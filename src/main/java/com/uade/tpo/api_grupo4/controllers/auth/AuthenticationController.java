@@ -21,10 +21,10 @@ public class AuthenticationController {
     private final AuthenticationService authService;
 
     @PostMapping("/registerUser")
-    public ResponseEntity<ResponseData<?>> registerUser(
+    public ResponseEntity<ResponseData<?>> register(
         @RequestBody RegisterRequest request) {
         try {
-            AuthenticationResponse authResponse = authService.registerUser(request);
+            AuthenticationResponse authResponse = authService.register(request);
             if(authResponse.getAccessToken() != null) return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(authResponse));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error("No se pudo registrar el usuario"));
 
@@ -40,10 +40,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticateUser")
-    public ResponseEntity<ResponseData<?>> authenticateUser(
+    public ResponseEntity<ResponseData<?>> authenticate(
         @RequestBody AuthenticationRequest request) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(authService.authenticateUser(request)));
+            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(authService.authenticate(request)));
 
             }catch (UserException | AuthException error) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(ResponseData.error(error.getMessage()));

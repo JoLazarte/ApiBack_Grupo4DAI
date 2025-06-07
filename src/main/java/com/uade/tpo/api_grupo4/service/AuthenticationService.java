@@ -30,7 +30,7 @@ public class AuthenticationService {
         private UserService userService;
       
 
-        public AuthenticationResponse registerUser(RegisterRequest request) throws Exception {
+        public AuthenticationResponse register(RegisterRequest request) throws Exception {
                 try{
                         User user = userService.createUser(request);
                         String jwtToken = jwtService.generateToken(user);
@@ -44,7 +44,7 @@ public class AuthenticationService {
                 }
         }
         
-        public AuthenticationResponse authenticateUser(AuthenticationRequest request) throws Exception {
+        public AuthenticationResponse authenticate(AuthenticationRequest request) throws Exception {
                 try{
                         authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(

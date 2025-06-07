@@ -3,7 +3,7 @@ package com.uade.tpo.api_grupo4.entity;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+//import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.uade.tpo.api_grupo4.controllers.user.StudentDTO;
 
 import jakarta.persistence.CascadeType;
@@ -13,7 +13,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,8 +30,11 @@ public class Student{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @ManyToMany
+    @JoinTable(
+    name = "courseEnrolled_student", 
+    joinColumns = @JoinColumn(name = "student_id"), 
+    inverseJoinColumns = @JoinColumn(name = "courseEnrolled_id"))
     private List<CourseEnrolled> coursesEnrolled;
     @Column(unique = true)
     private int cardNumber;
