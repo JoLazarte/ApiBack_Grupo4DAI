@@ -19,7 +19,7 @@ public class StudentService {
 
     public Student createStudent(User user) throws Exception {
 			try { 
-				Student newStudent = new Student(null, new ArrayList<>(),null, "","",null, null, user);
+				Student newStudent = new Student(null, new ArrayList<>(),0, "","",0, 0, user);
         return newStudent;
 	
 			} catch (UserException error) {

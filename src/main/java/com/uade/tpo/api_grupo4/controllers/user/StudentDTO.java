@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uade.tpo.api_grupo4.entity.CourseEnrolled;
 import com.uade.tpo.api_grupo4.entity.Student;
+import com.uade.tpo.api_grupo4.entity.User;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -14,21 +15,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudentDTO {
-     private Long id;
     
+    private Long id;
     @JsonIgnore
     private List<CourseEnrolled> coursesEnrolled;
     @NotNull
-    private Long cardNumber;
+    private int cardNumber;
     @NotNull
     private String dniFrente;
     @NotNull
     private String dniDorso;
     @NotNull
-    private Long nroTramite;
+    private int nroTramite;
     @NotNull
-    private Long cuentaCorriente;
+    private int cuentaCorriente;
     
+    private User user;
+
 
     public Student toEntity() {
         return new Student(
@@ -38,7 +41,8 @@ public class StudentDTO {
                 this.dniFrente,
                 this.dniDorso,
                 this.nroTramite,
-                this.cuentaCorriente
+                this.cuentaCorriente, 
+                this.user
             );   
                 
     }

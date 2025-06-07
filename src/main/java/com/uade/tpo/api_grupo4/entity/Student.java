@@ -33,7 +33,7 @@ public class Student{
     @JsonManagedReference
     private List<CourseEnrolled> coursesEnrolled;
     @Column(unique = true)
-    private Long cardNumber;
+    private int cardNumber;
     //@NotEmpty
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String dniFrente;
@@ -41,9 +41,9 @@ public class Student{
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String dniDorso;
     @Column(unique = true)
-    private Long nroTramite;
+    private int nroTramite;
     @Column(unique = true)
-    private Long cuentaCorriente;
+    private int cuentaCorriente;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     @JsonBackReference
@@ -57,7 +57,8 @@ public class Student{
                 this.dniFrente,
                 this.dniDorso,
                 this.nroTramite,
-                this.cuentaCorriente
+                this.cuentaCorriente, 
+                this.user
                 );
     }
 
