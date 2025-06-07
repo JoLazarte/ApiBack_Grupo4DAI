@@ -61,6 +61,14 @@ public class User implements UserDetails{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<SavedRecipe> savedRecipes;
+    @NotNull
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Recipe> recipes;
+    @NotNull
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Review> reviews;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "student_id")
     @JsonManagedReference
@@ -80,7 +88,9 @@ public class User implements UserDetails{
                 this.urlAvatar,
                 this.userStatus,
                 this.permissionGranted,
-                this.savedRecipes, 
+                this.savedRecipes,
+                this.recipes,
+                this.reviews,
                 this.student
               
                 );

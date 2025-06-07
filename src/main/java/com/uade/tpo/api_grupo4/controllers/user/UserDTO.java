@@ -3,6 +3,8 @@ package com.uade.tpo.api_grupo4.controllers.user;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uade.tpo.api_grupo4.entity.Recipe;
+import com.uade.tpo.api_grupo4.entity.Review;
 import com.uade.tpo.api_grupo4.entity.Role;
 import com.uade.tpo.api_grupo4.entity.SavedRecipe;
 import com.uade.tpo.api_grupo4.entity.Student;
@@ -44,6 +46,10 @@ public class UserDTO {
     @JsonIgnore
     private List<SavedRecipe> savedRecipes;
     @JsonIgnore
+    private List<Recipe> recipes;
+    @JsonIgnore
+    private List<Review> reviews;
+    @JsonIgnore
     private Student student;
     
     public User toEntity() {
@@ -61,6 +67,8 @@ public class UserDTO {
                 this.userStatus,
                 this.permissionGranted,
                 this.savedRecipes,
+                this.recipes,
+                this.reviews,
                 this.student
             );   
                 

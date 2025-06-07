@@ -1,9 +1,24 @@
 package com.uade.tpo.api_grupo4.entity;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+//import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +33,37 @@ public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "user_id")
+    @JsonBackReference
+    private User user;
+    private String recipeName;
+    @ManyToMany
+    @JoinTable(
+    name = "step_recipe", 
+    joinColumns = @JoinColumn(name = "recipe_id"), 
+    inverseJoinColumns = @JoinColumn(name = "step_id"))
+    private List<Step> description;	
+    @ManyToMany
+    @JoinTable(
+    name = "materialUsed_recipe", 
+    joinColumns = @JoinColumn(name = "recipe_id"), 
+    inverseJoinColumns = @JoinColumn(name = "materialUsed_id"))
+    private List<MaterialUsed> ingredients;       	
+    //@NotEmpty
+    @ElementCollection
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private List<String> images;
+    private int servings;	
+    private int comensales;	
+    @ManyToOne
+    @JoinColumn(name = "typeOfRecipe_id")
+    private TypeOfRecipe typeOfRecipe; //seria como la categoria. Ej: vegana, desayuno, etc
+    @NotNull
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Review> reviews;
     
 
 }

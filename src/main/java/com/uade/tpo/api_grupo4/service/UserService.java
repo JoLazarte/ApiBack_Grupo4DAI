@@ -38,7 +38,7 @@ public class UserService {
 				User user = new User(null,request.getUsername(), request.getFirstName(), request.getLastName(),
 								request.getEmail(),
 								passwordEncoder.encode(request.getPassword()),
-                request.getPhone(), request.getAddress(), request.getRole(), request.getUrlAvatar(), 1, true, new ArrayList<>(), null);
+                request.getPhone(), request.getAddress(), request.getRole(), request.getUrlAvatar(), 1, true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
 
                 if(request.getRole()==Role.STUDENT){
                   user.setPermissionGranted(false);;
