@@ -5,8 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
+
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,13 +28,14 @@ public class StudentController {
 
     @PutMapping("/student/{studentId}")
     public ResponseEntity<ResponseData<?>> updateStudent(@AuthenticationPrincipal UserDetails userDetails,
-      @PathVariable Long studentId) {
+      @RequestBody StudentDTO studentDTO) {
         try {
             User authUser = userService.getUserByUsername(userDetails.getUsername());
             Student student = authUser.getStudent();
+            student = studentDTO.toEntity();
             Student studentUpdated = studentService.updateStudent(student);
-            StudentDTO studentDTO = studentUpdated.toDTO();
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(studentDTO));
+            StudentDTO updatedStudentDTO = studentUpdated.toDTO();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(updatedStudentDTO));
 
         } catch (UserException error) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));

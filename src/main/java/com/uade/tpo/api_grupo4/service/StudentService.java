@@ -1,11 +1,9 @@
 package com.uade.tpo.api_grupo4.service;
 
-import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uade.tpo.api_grupo4.entity.Student;
-import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 
@@ -17,9 +15,9 @@ public class StudentService {
     private StudentRepository studentRepository;
     
 
-    public Student createStudent(User user) throws Exception {
+    public Student createStudent() throws Exception {
 			try { 
-				Student newStudent = new Student(null, new ArrayList<>(),0, "","",0, 0, user);
+				Student newStudent = new Student();
         return newStudent;
 	
 			} catch (UserException error) {
