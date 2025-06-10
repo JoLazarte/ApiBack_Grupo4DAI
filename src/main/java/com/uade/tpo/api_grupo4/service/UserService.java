@@ -10,7 +10,7 @@ import com.uade.tpo.api_grupo4.controllers.auth.RegisterRequest;
 import com.uade.tpo.api_grupo4.entity.Role;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
-import com.uade.tpo.api_grupo4.exceptions.RoleException;
+//import com.uade.tpo.api_grupo4.exceptions.RoleException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 
 import com.uade.tpo.api_grupo4.repository.UserRepository;
@@ -46,7 +46,8 @@ public class UserService {
                   Student student = studentService.createStudent(user);
                   user.setStudent(student);
                   user.assignStudent(student);
-                  throw new RoleException("Por favor complete su registro como estudiante.");
+                  
+                  System.out.println("Por favor complete su registro como estudiante.");
                  
                 }  
                return userRepository.save(user);
@@ -57,5 +58,13 @@ public class UserService {
 				throw new Exception("[UserService.createUser] -> " + error.getMessage());
 			}
     }
-    
+    public User getUserByUsername(String username) throws Exception {
+        try {
+          return userRepository.findByUsername(username).orElseThrow(() -> new UserException("Usuario no encontrado"));
+        } catch (UserException error) {
+          throw new UserException(error.getMessage());
+        } catch (Exception error) {
+          throw new Exception("[UserService.getUserByUsername] -> " + error.getMessage());
+        }
+    }
 }
