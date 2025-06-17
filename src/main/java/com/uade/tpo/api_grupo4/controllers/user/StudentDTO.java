@@ -7,7 +7,7 @@ import com.uade.tpo.api_grupo4.entity.CourseEnrolled;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
 
-import jakarta.validation.constraints.NotNull;
+//import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,15 +19,15 @@ public class StudentDTO {
     private Long id;
     @JsonIgnore
     private List<CourseEnrolled> coursesEnrolled;
-    @NotNull
+  
     private int cardNumber;
-    @NotNull
+
     private String dniFrente;
-    @NotNull
+ 
     private String dniDorso;
-    @NotNull
+
     private int nroTramite;
-    @NotNull
+
     private int cuentaCorriente;
     
     private User user;

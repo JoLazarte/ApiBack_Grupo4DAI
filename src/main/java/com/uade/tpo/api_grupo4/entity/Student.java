@@ -36,7 +36,7 @@ public class Student{
     joinColumns = @JoinColumn(name = "student_id"), 
     inverseJoinColumns = @JoinColumn(name = "courseEnrolled_id"))
     private List<CourseEnrolled> coursesEnrolled;
-    @Column(unique = true)
+    //@Column(unique = true)
     private int cardNumber;
     //@NotEmpty
     @Column(nullable = false, columnDefinition = "LONGTEXT")
@@ -44,9 +44,9 @@ public class Student{
     //@NotEmpty
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String dniDorso;
-    @Column(unique = true)
+    //@Column(unique = true)
     private int nroTramite;
-    @Column(unique = true)
+    //@Column(unique = true)
     private int cuentaCorriente;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
@@ -66,6 +66,17 @@ public class Student{
                 );
     }
 
+    public void assignUser(User user) {
+        this.user.setStudent(this);
+    }
+
+    public void updateData(Student newStudent){
+        setCardNumber(newStudent.getCardNumber());
+        setDniFrente(newStudent.getDniFrente());
+        setDniDorso(newStudent.getDniDorso());
+        setNroTramite(newStudent.getNroTramite());
+        setCuentaCorriente(newStudent.getCuentaCorriente());
+    }
      
 
 }

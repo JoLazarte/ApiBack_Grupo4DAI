@@ -27,27 +27,29 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder; 
     
-    @Transactional
+    //@Transactional
     public User createUser(RegisterRequest request) throws Exception {
 			try {
 				boolean userExist = userRepository.existsByUsername(request.getUsername());
           if(userExist) throw new UserException("El usuario " + request.getUsername() + " ya existe");
             userExist = userRepository.existsByEmail(request.getEmail());
           if(userExist) throw new UserException("El email " + request.getEmail() + " ya esta registrado.");
-
+        
+        Student student = studentService.createStudent();   
 				User user = new User(null,request.getUsername(), request.getFirstName(), request.getLastName(),
 								request.getEmail(),
 								passwordEncoder.encode(request.getPassword()),
                 request.getPhone(), request.getAddress(), request.getRole(), request.getUrlAvatar(), 1, true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
-
-                if(request.getRole()==Role.STUDENT){
-                  user.setPermissionGranted(false);;
+        
+        if(request.getRole()==Role.STUDENT){
+                  user.setPermissionGranted(false);
                   user.setUserStatus(2);
-                  Student student = studentService.createStudent(user);
+                  
                   user.setStudent(student);
                   user.assignStudent(student);
-                  
-                  System.out.println("Por favor complete su registro como estudiante.");
+                  student.setUser(user);
+                  student.assignUser(user);
+                  //System.out.println("Por favor complete su registro como estudiante.");
                  
                 }  
                return userRepository.save(user);
