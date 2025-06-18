@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 //import com.uade.tpo.api_grupo4.controllers.auth.StudentRequest;
 import com.uade.tpo.api_grupo4.entity.Student;
-import com.uade.tpo.api_grupo4.entity.User;
+//import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 
