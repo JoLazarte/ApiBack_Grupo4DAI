@@ -1,24 +1,18 @@
 package com.uade.tpo.api_grupo4.entity;
 
-import java.util.Collection;
 import java.util.List;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.uade.tpo.api_grupo4.controllers.user.UserDTO;
+import com.uade.tpo.api_grupo4.controllers.user.UserView;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,33 +24,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class User implements UserDetails{
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
-    private String username;
-    @Column
-    private String firstName;
-    @Column
-    private String lastName;
-    @Column(unique = true)
-    private String email;
-    @Column
-    private String password;
-    @Column(unique = true)
-    private String phone;
-    @Column(unique = true)
-    private String address;
-    @Column
-    private Role role;
-    //@NotEmpty
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
-    private String urlAvatar;
-    @Column
-    private int userStatus;	
-    @Column
-    private Boolean permissionGranted;
     @NotNull
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
@@ -69,46 +40,37 @@ public class User implements UserDetails{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Review> reviews;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "student_id")
-    @JsonManagedReference
-    private Student student;
-    
-    public UserDTO toDTO() {
-        return new UserDTO(
+    @ManyToOne
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Person persona;
+
+    public UserView toView() {
+        return new UserView(
                 this.id,
-                this.username,
-                this.firstName,
-                this.lastName,
-                this.email,
-                this.password,
-                this.phone,
-                this.address,
-                this.role,
-                this.urlAvatar,
-                this.userStatus,
-                this.permissionGranted,
                 this.savedRecipes,
                 this.recipes,
-                this.reviews,
-                this.student
-              
-                );
+                this.reviews
+                
+            );
+    }
+    public UserView toViewDos(){
+        return new UserView(
+            this.id,
+            this.persona.getUsername(), 
+            this.persona.getFirstName(), 
+            this.persona.getLastName(), 
+            this.persona.getEmail(), 
+            this.persona.getPassword(), 
+            this.persona.getPhone(), 
+            this.persona.getAddress(), 
+            this.persona.getUrlAvatar(), 
+            this.persona.getPermissionGranted(), 
+            this.savedRecipes, 
+            this.recipes, 
+            this.reviews
+            );
     }
 
-    public void assignStudent(Student student) {
-        this.student.setUser(this);
-    }
 
-    public void updateData(User newUser){
-        setFirstName(newUser.getFirstName());
-        setLastName(newUser.getLastName());
-        setEmail(newUser.getEmail());
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
+    
 }

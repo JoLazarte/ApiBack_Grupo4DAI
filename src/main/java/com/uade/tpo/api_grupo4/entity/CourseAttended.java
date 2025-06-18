@@ -1,10 +1,6 @@
 package com.uade.tpo.api_grupo4.entity;
-
 import java.util.List;
 
-//import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,14 +18,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CourseEnrolled {
+public class CourseAttended {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
     private CourseSchedule courseSchedule;
     @NotNull
-    @ManyToMany(mappedBy = "coursesEnrolled")
+    @ManyToMany(mappedBy = "attendedCourses")
     private List<Student> students;
     
 }
+

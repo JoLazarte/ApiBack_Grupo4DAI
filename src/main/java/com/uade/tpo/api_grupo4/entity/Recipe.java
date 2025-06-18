@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +15,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 //import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -39,11 +38,8 @@ public class Recipe {
     @JsonBackReference
     private User user;
     private String recipeName;
-    @ManyToMany
-    @JoinTable(
-    name = "step_recipe", 
-    joinColumns = @JoinColumn(name = "recipe_id"), 
-    inverseJoinColumns = @JoinColumn(name = "step_id"))
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Step> description;	
     @ManyToMany
     @JoinTable(
@@ -52,9 +48,10 @@ public class Recipe {
     inverseJoinColumns = @JoinColumn(name = "materialUsed_id"))
     private List<MaterialUsed> ingredients;       	
     //@NotEmpty
-    @ElementCollection
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
-    private List<String> images;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "picture_id")
+    @JsonBackReference 
+    private Picture mainPicture;
     private int servings;	
     private int comensales;	
     @ManyToOne

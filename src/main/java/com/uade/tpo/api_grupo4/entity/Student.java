@@ -2,11 +2,9 @@ package com.uade.tpo.api_grupo4.entity;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 //import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.uade.tpo.api_grupo4.controllers.user.StudentDTO;
+import com.uade.tpo.api_grupo4.controllers.student.StudentView;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,10 +30,10 @@ public class Student{
     private Long id;
     @ManyToMany
     @JoinTable(
-    name = "courseEnrolled_student", 
+    name = "attendedCourse_student", 
     joinColumns = @JoinColumn(name = "student_id"), 
-    inverseJoinColumns = @JoinColumn(name = "courseEnrolled_id"))
-    private List<CourseEnrolled> coursesEnrolled;
+    inverseJoinColumns = @JoinColumn(name = "attendedCourse_id"))
+    private List<CourseAttended> attendedCourses;
     //@Column(unique = true)
     private int cardNumber;
     //@NotEmpty
@@ -48,35 +46,42 @@ public class Student{
     private int nroTramite;
     //@Column(unique = true)
     private int cuentaCorriente;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
-    @JsonBackReference
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Person persona;
 
-    public StudentDTO toDTO() {
-        return new StudentDTO(
+    public StudentView toView() {
+        return new StudentView(
                 this.id,
-                this.coursesEnrolled,
+                this.attendedCourses,
                 this.cardNumber,
                 this.dniFrente,
                 this.dniDorso,
                 this.nroTramite,
-                this.cuentaCorriente, 
-                this.user
+                this.cuentaCorriente
                 );
     }
-
-    public void assignUser(User user) {
-        this.user.setStudent(this);
+    public StudentView toViewDos(){
+        return new StudentView(
+                this.id,
+                this.persona.getUsername(), 
+                this.persona.getFirstName(), 
+                this.persona.getLastName(), 
+                this.persona.getEmail(), 
+                this.persona.getPassword(), 
+                this.persona.getPhone(), 
+                this.persona.getAddress(), 
+                this.persona.getUrlAvatar(), 
+                this.persona.getPermissionGranted(), 
+                this.attendedCourses,
+                this.cardNumber,
+                this.dniFrente,
+                this.dniDorso,
+                this.nroTramite,
+                this.cuentaCorriente
+        );
     }
 
-    public void updateData(Student newStudent){
-        setCardNumber(newStudent.getCardNumber());
-        setDniFrente(newStudent.getDniFrente());
-        setDniDorso(newStudent.getDniDorso());
-        setNroTramite(newStudent.getNroTramite());
-        setCuentaCorriente(newStudent.getCuentaCorriente());
-    }
      
 
 }
