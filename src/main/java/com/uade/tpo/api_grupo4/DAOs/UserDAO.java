@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.uade.tpo.api_grupo4.entity.User;
-import com.uade.tpo.api_grupo4.exceptions.UserException;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
 
+@Service
 public class UserDAO {
 
     private static UserDAO instancia;
@@ -41,13 +43,5 @@ public class UserDAO {
         return userRepository.findById(userId);
     }
 
-    public User getUserByUsername(String username) throws Exception {
-        try {
-          return userRepository.findByUsername(username).orElseThrow(() -> new UserException("Usuario no encontrado"));
-        } catch (UserException error) {
-          throw new UserException(error.getMessage());
-        } catch (Exception error) {
-          throw new Exception("[UserService.getUserByUsername] -> " + error.getMessage());
-        }
-    }
+
 }

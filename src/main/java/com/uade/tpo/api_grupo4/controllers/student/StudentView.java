@@ -2,17 +2,20 @@ package com.uade.tpo.api_grupo4.controllers.student;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 import com.uade.tpo.api_grupo4.entity.CourseAttended;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentView {
-    private Long id;
+public class StudentView extends PersonView{
+
     private String username;
     private String firstName; 
     private String lastName;
@@ -23,31 +26,36 @@ public class StudentView {
     private String urlAvatar;
     private Boolean permissionGranted;
     @JsonIgnore
-    private List<CourseAttended> attendedCourse;
+    private List<CourseAttended> attendedCourses;
     private int cardNumber;
     private String dniFrente;
     private String dniDorso;
     private int nroTramite;
     private int cuentaCorriente;
 
-    public StudentView(Long id, List<CourseAttended> attendedCourse, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente){
-                this.id = id;
-                this.attendedCourse = attendedCourse;
-                this.cardNumber = cardNumber;
-                this.dniFrente = dniFrente;
-                this.dniDorso = dniDorso;
-                this.nroTramite = nroTramite;
-                this.cuentaCorriente = cuentaCorriente;
+    public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
+            String phone, String address, String urlAvatar, Boolean permissionGranted,
+            List<CourseAttended> attendedCourses, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente) {
+        this.id = id;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.address = address;
+        this.urlAvatar = urlAvatar;
+        this.permissionGranted = permissionGranted;
+        this.attendedCourses = attendedCourses;
+        this.cardNumber = cardNumber;
+        this.dniFrente = dniFrente;
+        this.dniDorso = dniDorso;
+        this.nroTramite = nroTramite;
+        this.cuentaCorriente = cuentaCorriente;
     }
 
 
-
-    @Override
-    public String toString() {
-        return "StudentView [ attendedCourse=" + attendedCourse + ", cardNumber=" + cardNumber
-                + ", dniFrente=" + dniFrente + ", dniDorso=" + dniDorso + ", nroTramite=" + nroTramite
-                + ", cuentaCorriente=" + cuentaCorriente + "]";
-    }
+    
     
     
     

@@ -7,27 +7,21 @@ import com.uade.tpo.api_grupo4.controllers.student.StudentView;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
+@Data 
+@EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-public class Student{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Student extends Person{
+  
     @ManyToMany
     @JoinTable(
     name = "attendedCourse_student", 
@@ -37,42 +31,51 @@ public class Student{
     //@Column(unique = true)
     private int cardNumber;
     //@NotEmpty
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String dniFrente;
     //@NotEmpty
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String dniDorso;
     //@Column(unique = true)
     private int nroTramite;
     //@Column(unique = true)
     private int cuentaCorriente;
-    @ManyToOne
-    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Person persona;
 
-    public StudentView toView() {
-        return new StudentView(
-                this.id,
-                this.attendedCourses,
-                this.cardNumber,
-                this.dniFrente,
-                this.dniDorso,
-                this.nroTramite,
-                this.cuentaCorriente
-                );
+    public Student(Long id, String username, String firstName, String lastName, String email, String password,
+            String phone, String address, String urlAvatar, Boolean permissionGranted
+            //,List<CourseAttended> attendedCourses, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente
+            ) {
+        this.id = id;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.address = address;
+        this.urlAvatar = urlAvatar;
+        this.permissionGranted = permissionGranted;
+        //this.attendedCourses = attendedCourses;
+        //this.cardNumber = cardNumber;
+        //this.dniFrente = dniFrente;
+        //this.dniDorso = dniDorso;
+        //this.nroTramite = nroTramite;
+        //this.cuentaCorriente = cuentaCorriente;
     }
-    public StudentView toViewDos(){
+
+    
+    public StudentView toView(){
         return new StudentView(
                 this.id,
-                this.persona.getUsername(), 
-                this.persona.getFirstName(), 
-                this.persona.getLastName(), 
-                this.persona.getEmail(), 
-                this.persona.getPassword(), 
-                this.persona.getPhone(), 
-                this.persona.getAddress(), 
-                this.persona.getUrlAvatar(), 
-                this.persona.getPermissionGranted(), 
+                this.username, 
+                this.firstName, 
+                this.lastName, 
+                this.email, 
+                this.password, 
+                this.phone, 
+                this.address, 
+                this.urlAvatar, 
+                this.permissionGranted, 
                 this.attendedCourses,
                 this.cardNumber,
                 this.dniFrente,

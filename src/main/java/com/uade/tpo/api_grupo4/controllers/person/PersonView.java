@@ -9,31 +9,26 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PersonView {
-    private Long id;
+    protected Long id;
     @NotNull
-    private String username;
+    protected String username;
     @NotNull
-    private String firstName; 
+    protected String firstName; 
     @NotNull
-    private String lastName;
+    protected String lastName;
     @NotNull
-    private String email;
+    protected String email;
     @NotNull
-    private String password;
+    protected String password;
     @NotNull
     private String phone;
     @NotNull
-    private String address;
+    protected String address;
     @NotNull
-    private String urlAvatar;
+    protected String urlAvatar;
     @NotNull
-    private Boolean permissionGranted;
+    protected Boolean permissionGranted;
     
-    @Override
-    public String toString() {
-        return "PersonView [id=" + id + ", username=" + username + ", firstName=" + firstName + ", lastName=" + lastName
-                + ", email=" + email + ", password=" + password + ", phone=" + phone + ", address=" + address
-                + ", urlAvatar=" + urlAvatar + ", permissionGranted=" + permissionGranted + "]";
-    }
+   
     
 }

@@ -2,42 +2,52 @@ package com.uade.tpo.api_grupo4.entity;
 import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class Person {
+@NoArgsConstructor
+@SuperBuilder
+@MappedSuperclass
+public abstract class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
     @Column(unique = true)
-    private String username;
-    private String firstName;
-    private String lastName;
+    protected String username;
+    protected String firstName;
+    protected String lastName;
     @Column(unique = true)
-    private String email;
-    private String password;
+    protected String email;
+    protected String password;
     @Column(unique = true)
-    private String phone;
+    protected String phone;
     @Column(unique = true)
-    private String address;
+    protected String address;
     //@NotEmpty
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
-    private String urlAvatar;
-    private Boolean permissionGranted;
+    @Column(columnDefinition = "LONGTEXT")
+    protected String urlAvatar;
+    protected Boolean permissionGranted;
 
     public PersonView toView() {
-		return new PersonView(id, username, firstName, lastName, email, password, phone, address, urlAvatar, permissionGranted);
+		return new PersonView(
+            this.id, 
+            this.username, 
+            this.firstName, 
+            this.lastName, 
+            this.email, 
+            this.password, 
+            this.phone, 
+            this.address, 
+            this.urlAvatar, 
+            this.permissionGranted);
 	}
 
 }

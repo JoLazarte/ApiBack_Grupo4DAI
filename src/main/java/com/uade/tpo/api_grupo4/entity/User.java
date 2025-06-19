@@ -8,26 +8,19 @@ import com.uade.tpo.api_grupo4.controllers.user.UserView;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
+@Data 
+@EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class User extends Person {
+   
     @NotNull
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
@@ -40,31 +33,39 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Review> reviews;
-    @ManyToOne
-    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Person persona;
 
-    public UserView toView() {
-        return new UserView(
-                this.id,
-                this.savedRecipes,
-                this.recipes,
-                this.reviews
-                
-            );
+    public User(Long id, String username, String firstName, String lastName, String email, String password,
+            String phone, String address, String urlAvatar, Boolean permissionGranted
+            ,List<SavedRecipe> savedRecipes,List<Recipe> recipes, List<Review> reviews
+            ) {
+        this.id = id;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.address = address;
+        this.urlAvatar = urlAvatar;
+        this.permissionGranted = permissionGranted;
+        this.savedRecipes = savedRecipes;
+        this.recipes = recipes;
+        this.reviews = reviews;
     }
-    public UserView toViewDos(){
+    
+
+    public UserView toView(){
         return new UserView(
             this.id,
-            this.persona.getUsername(), 
-            this.persona.getFirstName(), 
-            this.persona.getLastName(), 
-            this.persona.getEmail(), 
-            this.persona.getPassword(), 
-            this.persona.getPhone(), 
-            this.persona.getAddress(), 
-            this.persona.getUrlAvatar(), 
-            this.persona.getPermissionGranted(), 
+            this.username, 
+            this.firstName, 
+            this.lastName, 
+            this.email, 
+            this.password, 
+            this.phone, 
+            this.address, 
+            this.urlAvatar, 
+            this.permissionGranted, 
             this.savedRecipes, 
             this.recipes, 
             this.reviews

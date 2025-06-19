@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 
-
+@Service
 public class StudentDAO {
     private static StudentDAO instancia;
     @Autowired
@@ -36,9 +36,10 @@ public class StudentDAO {
     public void save(Student student) {
         studentRepository.save(student);
     }
-
     public Student update(Student student) {
         return studentRepository.save(student);
     } 
+
+    
     
 }
