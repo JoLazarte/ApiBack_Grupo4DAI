@@ -49,7 +49,7 @@ public class ApiStudent {
     }
 
     @PostMapping("/loginStudent")
-    public ResponseEntity<Boolean> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Boolean> login(@RequestParam String username, @RequestParam String password) throws Exception {
         boolean resultado = controlador.loginEstudiante(username, password);
         return ResponseEntity.ok(resultado);
     }
