@@ -25,19 +25,14 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	//implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
-    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
+	//testImplementation 'org.springframework.security:spring-security-test'
+	//testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
 	// https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation group: 'com.mysql', name: 'mysql-connector-j', version: '9.3.0'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation

@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+//import org.springframework.stereotype.Service;
 
 import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
 
-@Service
+
 public class UserDAO {
 
     private static UserDAO instancia;

@@ -7,6 +7,7 @@ import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 import com.uade.tpo.api_grupo4.entity.Recipe;
 import com.uade.tpo.api_grupo4.entity.Review;
 import com.uade.tpo.api_grupo4.entity.SavedRecipe;
+import com.uade.tpo.api_grupo4.entity.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,6 +52,24 @@ public class UserView extends PersonView {
         this.savedRecipes = savedRecipes;
         this.recipes = recipes;
         this.reviews = reviews;
+    }
+
+     public User toEntity(){
+        return new User(
+            this.id,
+            this.username, 
+            this.firstName, 
+            this.lastName, 
+            this.email, 
+            this.password, 
+            this.phone, 
+            this.address, 
+            this.urlAvatar, 
+            this.permissionGranted, 
+            this.savedRecipes, 
+            this.recipes, 
+            this.reviews
+            );
     }
 
     

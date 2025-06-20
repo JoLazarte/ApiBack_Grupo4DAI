@@ -55,7 +55,7 @@ public class Student extends Person{
         this.address = address;
         this.urlAvatar = urlAvatar;
         this.permissionGranted = permissionGranted;
-        //this.attendedCourses = attendedCourses;
+       // this.attendedCourses = attendedCourses;
         //this.cardNumber = cardNumber;
         //this.dniFrente = dniFrente;
         //this.dniDorso = dniDorso;

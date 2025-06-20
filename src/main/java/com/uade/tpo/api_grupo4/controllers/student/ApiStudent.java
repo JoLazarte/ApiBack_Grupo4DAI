@@ -7,8 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+//import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uade.tpo.api_grupo4.controllers.Controlador;
@@ -33,11 +36,10 @@ public class ApiStudent {
         }
     }
 
-    @PostMapping("/createStudent")
-    public ResponseEntity<String> crearEmpleado(@PathVariable Long studentId, @PathVariable int cardNumber, @PathVariable String dniFrente, 
-            @PathVariable String dniDorso, @PathVariable int nroTramite, @PathVariable int cuentaCorriente) {
+    @PostMapping("/createStudent/{studentId}")
+    public ResponseEntity<String> crearEstudiante(@PathVariable Long studentId, @RequestBody Student updatedStudent) {
         try {
-            controlador.agregarEstudiante(studentId, cardNumber, dniFrente, dniDorso, nroTramite, cuentaCorriente);
+            controlador.agregarEstudiante(studentId, updatedStudent);
             return ResponseEntity.ok("Empleado creado exitosamente con el id: " + studentId);
         } catch (StudentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -47,7 +49,7 @@ public class ApiStudent {
     }
 
     @PostMapping("/loginStudent")
-    public ResponseEntity<Boolean> login(@PathVariable String username, @PathVariable String password) {
+    public ResponseEntity<Boolean> login(@RequestParam String username, @RequestParam String password) {
         boolean resultado = controlador.loginEstudiante(username, password);
         return ResponseEntity.ok(resultado);
     }

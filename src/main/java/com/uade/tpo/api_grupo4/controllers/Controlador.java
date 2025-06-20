@@ -6,8 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.uade.tpo.api_grupo4.DAOs.StudentDAO;
-import com.uade.tpo.api_grupo4.DAOs.UserDAO;
+import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
@@ -23,11 +22,6 @@ public class Controlador {
 	StudentRepository studentRepository;
 	@Autowired
 	UserRepository userRepository;
-  
-    @Autowired
-    UserDAO userDAO;
-    @Autowired
-    StudentDAO studentDAO;
 
     private Controlador() { }
 
@@ -48,14 +42,20 @@ public class Controlador {
 		return students;
 	}
 	//una vez que ya se ha completado la primera parte del registro:
-	public void agregarEstudiante(Long studentId, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente) throws StudentException {
+	public Student agregarEstudiante(Long studentId, Student student) throws StudentException {
 		//necesito corroborar que el estudiante haya completado la primera parte del registro, es decir que ya exista en BD
-		if (!studentRepository.existsById(studentId)) {
-			throw new StudentException("No existe un estudiante con el id " + studentId);
-		}
-		Student nuevoEstuadiante = new Student(new ArrayList<>(), cardNumber, dniFrente, dniDorso, nroTramite, cuentaCorriente);
-		studentRepository.save(nuevoEstuadiante);
-		System.out.println("Estudiante agregado: " + nuevoEstuadiante.getId());
+		return studentRepository.findById(studentId)
+						.map(existingStudent -> {
+							existingStudent.setAttendedCourses(new ArrayList<>());
+							existingStudent.setCardNumber(student.getCardNumber());
+							existingStudent.setDniFrente(student.getDniFrente());
+							existingStudent.setDniDorso(student.getDniDorso());
+							existingStudent.setNroTramite(student.getNroTramite());
+							existingStudent.setCuentaCorriente(student.getCuentaCorriente());
+							return studentRepository.save(existingStudent);
+						})
+						.orElseThrow(()-> new StudentException("null"));
+		
 	}
 
 	public void eliminarEstudiante(Long studentId) throws StudentException {
@@ -79,7 +79,7 @@ public class Controlador {
 
         return studentRepository.findByUsername(username);
     }
-	
+
 	public boolean loginEstudiante(String username, String password) {
 		Student student = findStudentByUsername(username);
 		if (student != null && student.getPassword().equals(password)) {
@@ -100,24 +100,21 @@ public class Controlador {
 		return usuarios;
 	}
 
-	public void crearUsuarioGeneral(String username, String firstName, String lastName, String email, String password,
-            String phone, String address, String urlAvatar, Boolean permissionGranted 
-			//, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente 
-	) throws UserException {
-		if (userRepository.existsByUsername(username) || studentRepository.existsByUsername(username)) {
-			throw new UserException("Ya existe un usuario o estudiante con el nombre de usuario: " + username);
+	public void crearUsuarioGeneral(RegisterRequest request) throws UserException {
+		if (userRepository.existsByUsername(request.getUsername()) || studentRepository.existsByUsername(request.getUsername())) {
+			throw new UserException("Ya existe un usuario o estudiante con el nombre de usuario: " + request.getUsername());
 		}
 		//permissionGranted seria como el rol: si el usurio quiere registrarse como estudiante directamente, permissionGranted es false
-		if(permissionGranted == false){
-			Student nuevoEstudiante = new Student(null, username, firstName, lastName,  email, password,
-            phone,  address,  urlAvatar,  false);
+		if(request.getPermissionGranted() == false){
+			Student nuevoEstudiante = new Student(null, request.getUsername(), request.getFirstName(), request.getLastName(),  request.getEmail(), request.getPassword(),
+            request.getPhone(),  request.getAddress(),  request.getUrlAvatar(),  false);
 			studentRepository.save(nuevoEstudiante);
 			System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
 			//luego se llama la funcion agregarEstudiante(args);
 		}
-		else {
-			User nuevoUsuario = new User( null, username, firstName, lastName,  email, password,
-            phone,  address,  urlAvatar,  true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+		if(request.getPermissionGranted() == true) {
+			User nuevoUsuario = new User( null, request.getUsername(), request.getFirstName(), request.getLastName(),  request.getEmail(), request.getPassword(),
+            request.getPhone(),  request.getAddress(),  request.getUrlAvatar(),  true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 			userRepository.save(nuevoUsuario);
 			System.out.println("Usuario agregado: " + nuevoUsuario.getId());
 		}	

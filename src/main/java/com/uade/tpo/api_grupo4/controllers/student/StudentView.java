@@ -4,6 +4,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 import com.uade.tpo.api_grupo4.entity.CourseAttended;
+import com.uade.tpo.api_grupo4.entity.Student;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -54,6 +55,21 @@ public class StudentView extends PersonView{
         this.cuentaCorriente = cuentaCorriente;
     }
 
+    public Student toEntity(){
+        return new Student(
+                this.id,
+                this.username, 
+                this.firstName, 
+                this.lastName, 
+                this.email, 
+                this.password, 
+                this.phone, 
+                this.address, 
+                this.urlAvatar, 
+                this.permissionGranted
+              
+        );
+    }
 
     
     
