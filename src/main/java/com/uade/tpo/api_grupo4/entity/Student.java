@@ -43,7 +43,7 @@ public class Student extends Person{
 
     public Student(Long id, String username, String firstName, String lastName, String email, String password,
             String phone, String address, String urlAvatar, Boolean permissionGranted
-            //,List<CourseAttended> attendedCourses, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente
+            ,List<CourseAttended> attendedCourses, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente
             ) {
         this.id = id;
         this.username = username;
@@ -55,12 +55,12 @@ public class Student extends Person{
         this.address = address;
         this.urlAvatar = urlAvatar;
         this.permissionGranted = permissionGranted;
-       // this.attendedCourses = attendedCourses;
-        //this.cardNumber = cardNumber;
-        //this.dniFrente = dniFrente;
-        //this.dniDorso = dniDorso;
-        //this.nroTramite = nroTramite;
-        //this.cuentaCorriente = cuentaCorriente;
+       this.attendedCourses = attendedCourses;
+        this.cardNumber = cardNumber;
+        this.dniFrente = dniFrente;
+        this.dniDorso = dniDorso;
+        this.nroTramite = nroTramite;
+        this.cuentaCorriente = cuentaCorriente;
     }
 
     

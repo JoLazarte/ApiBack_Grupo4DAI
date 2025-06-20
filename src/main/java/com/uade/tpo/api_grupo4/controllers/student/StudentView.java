@@ -66,7 +66,13 @@ public class StudentView extends PersonView{
                 this.phone, 
                 this.address, 
                 this.urlAvatar, 
-                this.permissionGranted
+                this.permissionGranted,
+                 this.attendedCourses,
+                this.cardNumber,
+                this.dniFrente,
+                this.dniDorso,
+                this.nroTramite,
+                this.cuentaCorriente
               
         );
     }

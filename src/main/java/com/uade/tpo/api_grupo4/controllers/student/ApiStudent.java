@@ -19,7 +19,7 @@ import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
 
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/apiStudent")
 public class ApiStudent {
     @Autowired
     private Controlador controlador;

@@ -107,7 +107,7 @@ public class Controlador {
 		//permissionGranted seria como el rol: si el usurio quiere registrarse como estudiante directamente, permissionGranted es false
 		if(request.getPermissionGranted() == false){
 			Student nuevoEstudiante = new Student(null, request.getUsername(), request.getFirstName(), request.getLastName(),  request.getEmail(), request.getPassword(),
-            request.getPhone(),  request.getAddress(),  request.getUrlAvatar(),  false);
+            request.getPhone(),  request.getAddress(),  request.getUrlAvatar(),  false, new ArrayList<>(), 0, "", "", 0, 0);
 			studentRepository.save(nuevoEstudiante);
 			System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
 			//luego se llama la funcion agregarEstudiante(args);
