@@ -1,6 +1,4 @@
-package com.uade.tpo.api_grupo4.controllers.auth;
-
-import com.uade.tpo.api_grupo4.entity.Role;
+package com.uade.tpo.api_grupo4.controllers.person;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,10 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
+ 
     @NotNull
     private String username;
     @NotNull
-    private String firstName;
+    private String firstName; 
     @NotNull
     private String lastName;
     @NotNull
@@ -26,11 +25,9 @@ public class RegisterRequest {
     private String phone;
     @NotNull
     private String address;
-
+    @NotNull
     private String urlAvatar;
     @NotNull
-    private Role role;
-   
-
+    private Boolean permissionGranted;
+    
 }
-

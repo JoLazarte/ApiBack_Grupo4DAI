@@ -1,43 +1,44 @@
-package com.uade.tpo.api_grupo4.entity;
+package com.uade.tpo.api_grupo4.controllers.user;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.uade.tpo.api_grupo4.controllers.user.UserView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uade.tpo.api_grupo4.controllers.person.PersonView;
+import com.uade.tpo.api_grupo4.entity.Recipe;
+import com.uade.tpo.api_grupo4.entity.Review;
+import com.uade.tpo.api_grupo4.entity.SavedRecipe;
+import com.uade.tpo.api_grupo4.entity.User;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data 
+@Data
 @EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class User extends Person {
-   
-    @NotNull
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<SavedRecipe> savedRecipes;
-    @NotNull
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Recipe> recipes;
-    @NotNull
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Review> reviews;
+public class UserView extends PersonView {
 
-    public User(Long id, String username, String firstName, String lastName, String email, String password,
-            String phone, String address, String urlAvatar, Boolean permissionGranted
-            ,List<SavedRecipe> savedRecipes,List<Recipe> recipes, List<Review> reviews
-            ) {
+    private String username;
+    private String firstName; 
+    private String lastName;
+    private String email;
+    private String password;
+    private String phone;
+    private String address;
+    private String urlAvatar;
+    private Boolean permissionGranted;
+    @JsonIgnore
+    private List<SavedRecipe> savedRecipes;
+    @JsonIgnore
+    private List<Recipe> recipes;
+    @JsonIgnore
+    private List<Review> reviews;
+    
+    public UserView(Long id, String username, String firstName, String lastName, String email, String password,
+            String phone, String address, String urlAvatar, Boolean permissionGranted,
+            List<SavedRecipe> savedRecipes,List<Recipe> recipes, List<Review> reviews) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -52,10 +53,9 @@ public class User extends Person {
         this.recipes = recipes;
         this.reviews = reviews;
     }
-    
 
-    public UserView toView(){
-        return new UserView(
+     public User toEntity(){
+        return new User(
             this.id,
             this.username, 
             this.firstName, 
@@ -72,6 +72,7 @@ public class User extends Person {
             );
     }
 
-
     
+
+   
 }

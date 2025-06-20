@@ -31,9 +31,10 @@ public class Headquarter {
     @Column(unique = true)
     private String whattsapp;
     private String typeOfBonus;
-    private String courseBonus;	
+    private Double courseBonus;	
     private String typeOfPromo;	
-    private String coursePromo;
+    private Double coursePromo;
+    
     @ManyToMany(mappedBy = "headquarters")
     private List<CourseSchedule> coursesScheduled;
 }

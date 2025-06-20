@@ -41,5 +41,5 @@ public class CourseSchedule implements Serializable {
     private Course course;
     private LocalDate startDate;
     private LocalDate completionDate;
-    private Boolean vacancy;
+    private int vacancy;
 }

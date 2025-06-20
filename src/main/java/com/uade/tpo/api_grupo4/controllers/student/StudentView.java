@@ -1,50 +1,42 @@
-package com.uade.tpo.api_grupo4.entity;
-
+package com.uade.tpo.api_grupo4.controllers.student;
 import java.util.List;
 
-//import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.uade.tpo.api_grupo4.controllers.student.StudentView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uade.tpo.api_grupo4.controllers.person.PersonView;
+import com.uade.tpo.api_grupo4.entity.CourseAttended;
+import com.uade.tpo.api_grupo4.entity.Student;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data 
+@Data
 @EqualsAndHashCode(callSuper=false)
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Student extends Person{
-  
-    @ManyToMany
-    @JoinTable(
-    name = "attendedCourse_student", 
-    joinColumns = @JoinColumn(name = "student_id"), 
-    inverseJoinColumns = @JoinColumn(name = "attendedCourse_id"))
+public class StudentView extends PersonView{
+
+    private String username;
+    private String firstName; 
+    private String lastName;
+    private String email;
+    private String password;
+    private String phone;
+    private String address;
+    private String urlAvatar;
+    private Boolean permissionGranted;
+    @JsonIgnore
     private List<CourseAttended> attendedCourses;
-    //@Column(unique = true)
     private String cardNumber;
-    //@NotEmpty
-    @Column(columnDefinition = "LONGTEXT")
     private String dniFrente;
-    //@NotEmpty
-    @Column(columnDefinition = "LONGTEXT")
     private String dniDorso;
-    //@Column(unique = true)
     private String nroTramite;
-    //@Column(unique = true)
     private int cuentaCorriente;
 
-    public Student(Long id, String username, String firstName, String lastName, String email, String password,
-            String phone, String address, String urlAvatar, Boolean permissionGranted
-            ,List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente
-            ) {
+    public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
+            String phone, String address, String urlAvatar, Boolean permissionGranted,
+            List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -63,9 +55,8 @@ public class Student extends Person{
         this.cuentaCorriente = cuentaCorriente;
     }
 
-    
-    public StudentView toView(){
-        return new StudentView(
+    public Student toEntity(){
+        return new Student(
                 this.id,
                 this.username, 
                 this.firstName, 
@@ -75,16 +66,19 @@ public class Student extends Person{
                 this.phone, 
                 this.address, 
                 this.urlAvatar, 
-                this.permissionGranted, 
+                this.permissionGranted,
                 this.attendedCourses,
                 this.cardNumber,
                 this.dniFrente,
                 this.dniDorso,
                 this.nroTramite,
                 this.cuentaCorriente
+              
         );
     }
 
-     
-
+    
+    
+    
+    
 }
