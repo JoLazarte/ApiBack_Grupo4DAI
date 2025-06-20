@@ -28,15 +28,15 @@ public class StudentView extends PersonView{
     private Boolean permissionGranted;
     @JsonIgnore
     private List<CourseAttended> attendedCourses;
-    private int cardNumber;
+    private String cardNumber;
     private String dniFrente;
     private String dniDorso;
-    private int nroTramite;
+    private String nroTramite;
     private int cuentaCorriente;
 
     public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
             String phone, String address, String urlAvatar, Boolean permissionGranted,
-            List<CourseAttended> attendedCourses, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente) {
+            List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -67,7 +67,7 @@ public class StudentView extends PersonView{
                 this.address, 
                 this.urlAvatar, 
                 this.permissionGranted,
-                 this.attendedCourses,
+                this.attendedCourses,
                 this.cardNumber,
                 this.dniFrente,
                 this.dniDorso,

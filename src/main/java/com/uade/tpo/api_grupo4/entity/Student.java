@@ -29,7 +29,7 @@ public class Student extends Person{
     inverseJoinColumns = @JoinColumn(name = "attendedCourse_id"))
     private List<CourseAttended> attendedCourses;
     //@Column(unique = true)
-    private int cardNumber;
+    private String cardNumber;
     //@NotEmpty
     @Column(columnDefinition = "LONGTEXT")
     private String dniFrente;
@@ -37,13 +37,13 @@ public class Student extends Person{
     @Column(columnDefinition = "LONGTEXT")
     private String dniDorso;
     //@Column(unique = true)
-    private int nroTramite;
+    private String nroTramite;
     //@Column(unique = true)
     private int cuentaCorriente;
 
     public Student(Long id, String username, String firstName, String lastName, String email, String password,
             String phone, String address, String urlAvatar, Boolean permissionGranted
-            ,List<CourseAttended> attendedCourses, int cardNumber, String dniFrente, String dniDorso, int nroTramite, int cuentaCorriente
+            ,List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente
             ) {
         this.id = id;
         this.username = username;
@@ -55,7 +55,7 @@ public class Student extends Person{
         this.address = address;
         this.urlAvatar = urlAvatar;
         this.permissionGranted = permissionGranted;
-       this.attendedCourses = attendedCourses;
+        this.attendedCourses = attendedCourses;
         this.cardNumber = cardNumber;
         this.dniFrente = dniFrente;
         this.dniDorso = dniDorso;
