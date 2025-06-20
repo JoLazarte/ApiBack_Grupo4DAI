@@ -75,15 +75,20 @@ public class Controlador {
 		System.out.println("Contraseña actualizada para el estudiante: " + studentId);
 	}
 
-    public Student findStudentByUsername(String username){
-
-        return studentRepository.findByUsername(username);
+	//paso previo a la registracion o para logearse:
+    public Student findStudentByEmail(String email){
+        return studentRepository.findByEmail(email);
     }
 
-	public boolean loginEstudiante(String username, String password) {
-		Student student = findStudentByUsername(username);
+	public boolean loginEstudiante(String email, String password) throws Exception {
+		Student student = findStudentByEmail(email);
+		//logeo existoso
 		if (student != null && student.getPassword().equals(password)) {
 			return true;
+		}
+		//el estudiante ya esta registrado pero no coincide su password:
+		if (student !=null && student.getPassword() != password){
+			throw new StudentException("Ya existe un estudiante registrado con el email: " + email);
 		}
 		return false;
 	}
@@ -136,15 +141,20 @@ public class Controlador {
 		userRepository.save(usuario);
 		System.out.println("Contraseña actualizada para el usuario: " + userId);
 	}
-
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+	//paso previo a la registracion o para logearse:
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
-	public boolean loginUsuario(String username, String password) {
-		User usuario = findUserByUsername(username);
+	public boolean loginUsuario(String email, String password) throws Exception {
+		User usuario = findUserByEmail(email);
+		//logeo existoso:
 		if (usuario != null && usuario.getPassword().equals(password)) {
 			return true;
+		}
+		//el user ya esta registrado pero no coincide su password:
+		if (usuario !=null && usuario.getPassword() != password){
+			throw new UserException("Ya existe un usuario registrado con el email: " + email);
 		}
 		return false;
 	}
