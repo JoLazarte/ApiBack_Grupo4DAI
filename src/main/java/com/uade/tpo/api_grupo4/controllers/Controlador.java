@@ -7,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
+import com.uade.tpo.api_grupo4.entity.Recipe;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
+import com.uade.tpo.api_grupo4.exceptions.RecipeException;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
+import com.uade.tpo.api_grupo4.repository.RecipeRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
 
@@ -22,6 +25,8 @@ public class Controlador {
 	StudentRepository studentRepository;
 	@Autowired
 	UserRepository userRepository;
+	@Autowired
+	RecipeRepository recipeRepository;
 
     private Controlador() { }
 
@@ -54,7 +59,7 @@ public class Controlador {
 							existingStudent.setCuentaCorriente(student.getCuentaCorriente());
 							return studentRepository.save(existingStudent);
 						})
-						.orElseThrow(()-> new StudentException("null"));
+						.orElseThrow(()-> new StudentException("No existe el estudiante con el id" + studentId));
 		
 	}
 
@@ -160,7 +165,9 @@ public class Controlador {
 	}
 
 	
+	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    //-----------------------------------------------Recipes--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	
-	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
