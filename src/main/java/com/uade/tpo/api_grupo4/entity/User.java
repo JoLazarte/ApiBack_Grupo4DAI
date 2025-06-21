@@ -71,7 +71,5 @@ public class User extends Person {
             this.reviews
             );
     }
-
-
     
 }

@@ -5,12 +5,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
-import com.uade.tpo.api_grupo4.entity.Recipe;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
-import com.uade.tpo.api_grupo4.exceptions.RecipeException;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
@@ -47,9 +45,10 @@ public class Controlador {
 		return students;
 	}
 	//una vez que ya se ha completado la primera parte del registro:
-	public Student agregarEstudiante(Long studentId, Student student) throws StudentException {
+	public Student agregarEstudiante(Long id, Student student) throws StudentException {
+		
 		//necesito corroborar que el estudiante haya completado la primera parte del registro, es decir que ya exista en BD
-		return studentRepository.findById(studentId)
+		return studentRepository.findById(id)
 						.map(existingStudent -> {
 							existingStudent.setAttendedCourses(new ArrayList<>());
 							existingStudent.setCardNumber(student.getCardNumber());
@@ -59,8 +58,8 @@ public class Controlador {
 							existingStudent.setCuentaCorriente(student.getCuentaCorriente());
 							return studentRepository.save(existingStudent);
 						})
-						.orElseThrow(()-> new StudentException("No existe el estudiante con el id" + studentId));
-		
+						.orElseThrow(()-> new StudentException("No existe el estudiante con el id" + id));
+
 	}
 
 	public void eliminarEstudiante(Long studentId) throws StudentException {
@@ -85,15 +84,15 @@ public class Controlador {
         return studentRepository.findByEmail(email);
     }
 
-	public boolean loginEstudiante(String email, String password) throws Exception {
-		Student student = findStudentByEmail(email);
+	public boolean loginEstudiante(LoginRequest loginRequest) throws Exception {
+		Student student = findStudentByEmail(loginRequest.getUsername());
 		//logeo existoso
-		if (student != null && student.getPassword().equals(password)) {
+		if (student != null && student.getPassword().equals(loginRequest.getPassword())) {
 			return true;
 		}
 		//el estudiante ya esta registrado pero no coincide su password:
-		if (student !=null && student.getPassword() != password){
-			throw new StudentException("Ya existe un estudiante registrado con el email: " + email);
+		if (student !=null && student.getPassword() != loginRequest.getPassword()){
+			throw new StudentException("Ya existe un estudiante registrado con el nombre de usuario: " + loginRequest.getUsername());
 		}
 		return false;
 	}
@@ -116,15 +115,15 @@ public class Controlador {
 		}
 		//permissionGranted seria como el rol: si el usurio quiere registrarse como estudiante directamente, permissionGranted es false
 		if(request.getPermissionGranted() == false){
-			Student nuevoEstudiante = new Student(null, request.getUsername(), request.getFirstName(), request.getLastName(), request.getEmail(), request.getPassword(),
-            request.getPhone(),  request.getAddress(),  request.getUrlAvatar(),  false, new ArrayList<>(), "", "", "", "", 0);
+			Student nuevoEstudiante = new Student(null, request.getUsername(), "","", request.getEmail(), request.getPassword(),
+            "",  "",  "",  false, new ArrayList<>(), "", "", "", "", 0);
 			studentRepository.save(nuevoEstudiante);
 			System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
 			//luego se llama la funcion agregarEstudiante(args);
 		}
 		if(request.getPermissionGranted() == true) {
-			User nuevoUsuario = new User( null, request.getUsername(), request.getFirstName(), request.getLastName(),  request.getEmail(), request.getPassword(),
-            request.getPhone(),  request.getAddress(),  request.getUrlAvatar(),  true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+			User nuevoUsuario = new User( null, request.getUsername(), "","", request.getEmail(), request.getPassword(),
+            "",  "",  "", true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 			userRepository.save(nuevoUsuario);
 			System.out.println("Usuario agregado: " + nuevoUsuario.getId());
 		}	
@@ -136,6 +135,20 @@ public class Controlador {
 
 		userRepository.delete(usuario);
 		System.out.println("Usuario eliminado: " + userId);
+	}
+
+	public Student cambiarAEstudiante(Long id, Student student) throws Exception{
+		Student nuevoEstudiante;
+		//necesito corroborar que el usuario haya completado la primera parte del registro, es decir que ya exista en BD
+		User usuarioACambiar = userRepository.findById(id).orElseThrow(()-> new UserException("No existe el usuario con el id" + id));
+		//tomo los datos de ese usuario para crear un nuevo estudiante:
+		nuevoEstudiante = new Student(null, usuarioACambiar.getUsername(), "","", usuarioACambiar.getEmail(), usuarioACambiar.getPassword(),
+        "",  "",  "",  false, new ArrayList<>(), student.getCardNumber(),student.getDniFrente(), student.getDniDorso(), student.getNroTramite(), student.getCuentaCorriente());	
+		studentRepository.save(nuevoEstudiante);
+		System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
+		eliminarUsuario(id);			
+						
+		return nuevoEstudiante;
 	}
 
 	public void modificarPasswordUsuario(Long userId, String newPassword) throws UserException {
@@ -151,15 +164,15 @@ public class Controlador {
         return userRepository.findByEmail(email);
     }
 
-	public boolean loginUsuario(String email, String password) throws Exception {
-		User usuario = findUserByEmail(email);
+	public boolean loginUsuario(LoginRequest loginRequest) throws Exception {
+		User usuario = findUserByEmail(loginRequest.getUsername());
 		//logeo existoso:
-		if (usuario != null && usuario.getPassword().equals(password)) {
+		if (usuario != null && usuario.getPassword().equals(loginRequest.getPassword())) {
 			return true;
 		}
 		//el user ya esta registrado pero no coincide su password:
-		if (usuario !=null && usuario.getPassword() != password){
-			throw new UserException("Ya existe un usuario registrado con el email: " + email);
+		if (usuario !=null && usuario.getPassword() != loginRequest.getPassword()){
+			throw new UserException("Ya existe un usuario registrado con el nombre de usuario: " + loginRequest.getUsername());
 		}
 		return false;
 	}

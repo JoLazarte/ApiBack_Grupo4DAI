@@ -1,10 +1,7 @@
 package com.uade.tpo.api_grupo4.entity;
-
 import java.util.List;
-
 //import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.uade.tpo.api_grupo4.controllers.student.StudentView;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;

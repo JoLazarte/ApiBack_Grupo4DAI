@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.uade.tpo.api_grupo4.controllers.Controlador;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
+import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
+import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
+import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
+
 
 @RestController
 @RequestMapping("/apiUser")
@@ -43,12 +47,21 @@ public class ApiUser {
     }
 
     @PostMapping("/loginUser")
-    public ResponseEntity<Boolean> login(@RequestParam String username, @RequestParam String password) throws Exception {
-        boolean resultado = controlador.loginUsuario(username, password);
+    public ResponseEntity<Boolean> login(@RequestBody LoginRequest loginRequest) throws Exception {
+        boolean resultado = controlador.loginUsuario(loginRequest);
         return ResponseEntity.ok(resultado);
     }
 
-
-
-    
+    @PostMapping("/toStudent")
+    public ResponseEntity<String> cambiarAEstudiante(@PathVariable Long userId, @RequestBody Student student) {
+        try {
+            controlador.cambiarAEstudiante(userId, student);
+            return ResponseEntity.ok("Usuario de id: " + userId + " cambiando a Estudiante con éxito.");
+        } catch (StudentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
+        }
+    }
+      
 }

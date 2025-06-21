@@ -12,23 +12,16 @@ public class PersonView {
     protected Long id;
     @NotNull
     protected String username;
-    @NotNull
     protected String firstName; 
-    @NotNull
     protected String lastName;
     @NotNull
     protected String email;
     @NotNull
     protected String password;
-    @NotNull
     private String phone;
-    @NotNull
     protected String address;
-    @NotNull
     protected String urlAvatar;
     @NotNull
     protected Boolean permissionGranted;
-    
-   
-    
+          
 }

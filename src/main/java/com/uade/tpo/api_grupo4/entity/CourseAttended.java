@@ -28,4 +28,3 @@ public class CourseAttended {
     private List<Student> students;
     
 }
-
