@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
 import com.uade.tpo.api_grupo4.entity.Recipe;
 import com.uade.tpo.api_grupo4.entity.Student;
@@ -85,15 +85,15 @@ public class Controlador {
         return studentRepository.findByEmail(email);
     }
 
-	public boolean loginEstudiante(String email, String password) throws Exception {
-		Student student = findStudentByEmail(email);
+	public boolean loginEstudiante(LoginRequest loginRequest) throws Exception {
+		Student student = findStudentByEmail(loginRloginRequest.getUsername());
 		//logeo existoso
-		if (student != null && student.getPassword().equals(password)) {
+		if (student != null && student.getPassword().equals(loginRequest.getPassword())) {
 			return true;
 		}
 		//el estudiante ya esta registrado pero no coincide su password:
-		if (student !=null && student.getPassword() != password){
-			throw new StudentException("Ya existe un estudiante registrado con el email: " + email);
+		if (student !=null && student.getPassword() != loginRequest.getPassword()){
+			throw new StudentException("Ya existe un estudiante registrado con el nombre de usuario: " + loginRequest.getPassword());
 		}
 		return false;
 	}
@@ -151,15 +151,15 @@ public class Controlador {
         return userRepository.findByEmail(email);
     }
 
-	public boolean loginUsuario(String email, String password) throws Exception {
-		User usuario = findUserByEmail(email);
+	public boolean loginUsuario(LoginRequest loginRequest) throws Exception {
+		User usuario = findUserByEmail(loginRequest.getUsername());
 		//logeo existoso:
-		if (usuario != null && usuario.getPassword().equals(password)) {
+		if (usuario != null && usuario.getPassword().equals(loginRequest.getPassword())) {
 			return true;
 		}
 		//el user ya esta registrado pero no coincide su password:
-		if (usuario !=null && usuario.getPassword() != password){
-			throw new UserException("Ya existe un usuario registrado con el email: " + email);
+		if (usuario !=null && usuario.getPassword() != loginRequest.getPassword()){
+			throw new UserException("Ya existe un usuario registrado con el nombre de usuario: " + loginRequest.getPassword());
 		}
 		return false;
 	}

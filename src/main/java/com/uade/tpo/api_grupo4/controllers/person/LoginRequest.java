@@ -9,15 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
- 
+public class LoginRequest {
     @NotNull
     private String username;
     @NotNull
-    private String email;
-    @NotNull
     private String password;
-    @NotNull
-    private Boolean permissionGranted;
-    
 }

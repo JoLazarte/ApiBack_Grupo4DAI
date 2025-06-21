@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.uade.tpo.api_grupo4.controllers.Controlador;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
+import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 
@@ -43,8 +44,8 @@ public class ApiUser {
     }
 
     @PostMapping("/loginUser")
-    public ResponseEntity<Boolean> login(@RequestParam String username, @RequestParam String password) throws Exception {
-        boolean resultado = controlador.loginUsuario(username, password);
+    public ResponseEntity<Boolean> login(@BodyRequest LoginRequest loginRequest) throws Exception {
+        boolean resultado = controlador.loginUsuario(loginRequest);
         return ResponseEntity.ok(resultado);
     }
 
