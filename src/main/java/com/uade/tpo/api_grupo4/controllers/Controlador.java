@@ -92,7 +92,7 @@ public class Controlador {
 		}
 		//el estudiante ya esta registrado pero no coincide su password:
 		if (student !=null && student.getPassword() != loginRequest.getPassword()){
-			throw new StudentException("Ya existe un estudiante registrado con el nombre de usuario: " + loginRequest.getPassword());
+			throw new StudentException("Ya existe un estudiante registrado con el nombre de usuario: " + loginRequest.getUsername());
 		}
 		return false;
 	}
@@ -172,7 +172,7 @@ public class Controlador {
 		}
 		//el user ya esta registrado pero no coincide su password:
 		if (usuario !=null && usuario.getPassword() != loginRequest.getPassword()){
-			throw new UserException("Ya existe un usuario registrado con el nombre de usuario: " + loginRequest.getPassword());
+			throw new UserException("Ya existe un usuario registrado con el nombre de usuario: " + loginRequest.getUsername());
 		}
 		return false;
 	}
