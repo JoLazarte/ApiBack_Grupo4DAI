@@ -22,6 +22,11 @@ public class ApiUser {
     @Autowired
     private Controlador controlador;
 
+    @Autowired
+    public ApiUser(Controlador controlador) {
+        this.controlador = controlador;
+    }
+
     @GetMapping("/allUsers")
     public ResponseEntity<?> obtenerTodosLosUsuarios() {
         try {
@@ -36,14 +41,26 @@ public class ApiUser {
 
     @PostMapping("/registerUser")
     public ResponseEntity<String> agregarUsuarioGeneral(@RequestBody RegisterRequest request) {
-        try { 
+        try {
             controlador.crearUsuarioGeneral(request);
             return ResponseEntity.ok("Usuario agregado con éxito.");
         } catch (UserException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/check-alias")
+    public ResponseEntity<Boolean> checkAlias(@RequestParam String alias) {
+        boolean exists = controlador.aliasExists(alias);
+        return ResponseEntity.ok(exists);
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
+        boolean exists = controlador.emailExists(email);
+        return ResponseEntity.ok(exists);
     }
 
     @PostMapping("/loginUser")

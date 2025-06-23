@@ -23,6 +23,11 @@ public class ApiStudent {
     @Autowired
     private Controlador controlador;
     
+    @Autowired
+    public ApiStudent(Controlador controlador) {
+        this.controlador = controlador;
+    }
+
     @GetMapping("/allStudents")
     public ResponseEntity<?> obtenerTodosLosEstudiantes() {
         try {

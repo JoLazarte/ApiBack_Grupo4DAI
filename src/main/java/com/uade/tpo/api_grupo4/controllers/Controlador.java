@@ -33,6 +33,18 @@ public class Controlador {
 			instancia = new Controlador();
 		return instancia;
 	}
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	//-----------------------------------------------Metodos Publicos--------------------------------------------------------------------------------------------------------------------------------------------------------
+	public boolean aliasExists(String alias) {
+		
+		return userRepository.existsByUsername(alias) || studentRepository.existsByUsername(alias);
+	}
+
+	public boolean emailExists(String email) {
+	
+		return userRepository.existsByEmail(email) || studentRepository.existsByEmail(email);
+	}
 
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -79,22 +91,20 @@ public class Controlador {
 		System.out.println("Contraseña actualizada para el estudiante: " + studentId);
 	}
 
-	//paso previo a la registracion o para logearse:
+	public Student findStudentByUsername(String username) {
+		return studentRepository.findByUsername(username);
+	}
+
     public Student findStudentByEmail(String email){
         return studentRepository.findByEmail(email);
     }
 
 	public boolean loginEstudiante(LoginRequest loginRequest) throws Exception {
 		Student student = findStudentByEmail(loginRequest.getUsername());
-		//logeo existoso
-		if (student != null && student.getPassword().equals(loginRequest.getPassword())) {
-			return true;
+		if (student == null) {
+			return false;
 		}
-		//el estudiante ya esta registrado pero no coincide su password:
-		if (student !=null && student.getPassword() != loginRequest.getPassword()){
-			throw new StudentException("Ya existe un estudiante registrado con el nombre de usuario: " + loginRequest.getUsername());
-		}
-		return false;
+		return student.getPassword().equals(loginRequest.getPassword());
 	}
 
 
@@ -113,20 +123,49 @@ public class Controlador {
 		if (userRepository.existsByUsername(request.getUsername()) || studentRepository.existsByUsername(request.getUsername())) {
 			throw new UserException("Ya existe un usuario o estudiante con el nombre de usuario: " + request.getUsername());
 		}
+
+		if (userRepository.existsByEmail(request.getEmail()) || studentRepository.existsByEmail(request.getEmail())) {
+			throw new UserException("El correo electrónico '" + request.getEmail() + "' ya está registrado.");
+		}
+
+		if (request.getPermissionGranted() == true) {
+
+			// ---> LA LÍNEA A CAMBIAR ES ESTA <---
+			User nuevoUsuario = new User(
+					null,
+					request.getUsername(),
+					null, // firstName
+					null, // lastName
+					request.getEmail(),
+					request.getPassword(),
+					null, // address
+					null, // phone
+					null, // url_avatar
+					true, // permission_granted
+					new ArrayList<>(), // recipes
+					new ArrayList<>(), // ratings
+					new ArrayList<>()  // saved_recipes
+			);
+			userRepository.save(nuevoUsuario);
+			System.out.println("Usuario agregado con éxito: " + nuevoUsuario.getUsername());
+		}
+
 		//permissionGranted seria como el rol: si el usurio quiere registrarse como estudiante directamente, permissionGranted es false
 		if(request.getPermissionGranted() == false){
-			Student nuevoEstudiante = new Student(null, request.getUsername(), "","", request.getEmail(), request.getPassword(),
-            "",  "",  "",  false, new ArrayList<>(), "", "", "", "", 0);
+			Student nuevoEstudiante = new Student(null,
+					request.getUsername(),
+					null, // firstName
+					null, // lastName
+					request.getEmail(),
+					request.getPassword(),
+					null, // address
+					null, // phone
+					null, // url_avatar 
+					false, new ArrayList<>(), "", "", "", "", 0);
 			studentRepository.save(nuevoEstudiante);
 			System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
 			//luego se llama la funcion agregarEstudiante(args);
 		}
-		if(request.getPermissionGranted() == true) {
-			User nuevoUsuario = new User( null, request.getUsername(), "","", request.getEmail(), request.getPassword(),
-            "",  "",  "", true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-			userRepository.save(nuevoUsuario);
-			System.out.println("Usuario agregado: " + nuevoUsuario.getId());
-		}	
 	}
 
 	public void eliminarUsuario(Long userId) throws UserException {
@@ -159,22 +198,23 @@ public class Controlador {
 		userRepository.save(usuario);
 		System.out.println("Contraseña actualizada para el usuario: " + userId);
 	}
-	//paso previo a la registracion o para logearse:
+	
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-	public boolean loginUsuario(LoginRequest loginRequest) throws Exception {
-		User usuario = findUserByEmail(loginRequest.getUsername());
-		//logeo existoso:
-		if (usuario != null && usuario.getPassword().equals(loginRequest.getPassword())) {
-			return true;
+	public User findUserByUsername(String username) {
+		return userRepository.findByUsername(username);
+	}
+
+	public boolean loginUsuario(LoginRequest loginRequest) {
+		// PASO 4: Usamos el userRepository para llamar al método findByUsername
+		User usuario = userRepository.findByUsername(loginRequest.getUsername());
+
+		if (usuario == null) {
+			return false;
 		}
-		//el user ya esta registrado pero no coincide su password:
-		if (usuario !=null && usuario.getPassword() != loginRequest.getPassword()){
-			throw new UserException("Ya existe un usuario registrado con el nombre de usuario: " + loginRequest.getUsername());
-		}
-		return false;
+		return usuario.getPassword().equals(loginRequest.getPassword());
 	}
 
 	
