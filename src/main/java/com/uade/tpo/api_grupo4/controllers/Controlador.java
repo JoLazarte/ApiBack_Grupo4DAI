@@ -130,7 +130,6 @@ public class Controlador {
 
 		if (request.getPermissionGranted() == true) {
 
-			// ---> LA LÍNEA A CAMBIAR ES ESTA <---
 			User nuevoUsuario = new User(
 					null,
 					request.getUsername(),
@@ -181,8 +180,8 @@ public class Controlador {
 		//necesito corroborar que el usuario haya completado la primera parte del registro, es decir que ya exista en BD
 		User usuarioACambiar = userRepository.findById(id).orElseThrow(()-> new UserException("No existe el usuario con el id" + id));
 		//tomo los datos de ese usuario para crear un nuevo estudiante:
-		nuevoEstudiante = new Student(null, usuarioACambiar.getUsername(), "","", usuarioACambiar.getEmail(), usuarioACambiar.getPassword(),
-        "",  "",  "",  false, new ArrayList<>(), student.getCardNumber(),student.getDniFrente(), student.getDniDorso(), student.getNroTramite(), student.getCuentaCorriente());	
+		nuevoEstudiante = new Student(null, usuarioACambiar.getUsername(), null,null, usuarioACambiar.getEmail(), usuarioACambiar.getPassword(),
+        null,  null,  null,  false, new ArrayList<>(), student.getCardNumber(),student.getDniFrente(), student.getDniDorso(), student.getNroTramite(), student.getCuentaCorriente());	
 		studentRepository.save(nuevoEstudiante);
 		System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
 		eliminarUsuario(id);			
