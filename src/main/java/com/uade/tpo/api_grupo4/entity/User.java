@@ -5,6 +5,7 @@ package com.uade.tpo.api_grupo4.entity;
 import java.util.Collection; // <-- NUEVA IMPORTACIÓN
 import java.util.List;
 
+import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority; // <-- NUEVA IMPORTACIÓN
 import org.springframework.security.core.authority.SimpleGrantedAuthority; // <-- NUEVA IMPORTACIÓN
 import org.springframework.security.core.userdetails.UserDetails; // <-- NUEVA IMPORTACIÓN
@@ -17,12 +18,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

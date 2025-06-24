@@ -117,11 +117,47 @@ public class Controlador {
 		}
 
 		if (request.getPermissionGranted() == true) {
-			User nuevoUsuario = new User( null, request.getUsername(), null, null, request.getEmail(), request.getPassword(), null, null, null, true, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+			// Usamos el Builder para construir el objeto de forma más clara
+			User nuevoUsuario = User.builder()
+					.username(request.getUsername())
+					.email(request.getEmail())
+					.password(request.getPassword()) // NOTA: Aquí deberías codificar la contraseña antes de guardarla. Lo veremos después.
+					.firstName(request.getFirstName())
+					.lastName(request.getLastName())
+					.phone(request.getPhone())
+					.address(request.getAddress())
+					.urlAvatar(request.getUrlAvatar())
+					.permissionGranted(true)
+					.recipes(new ArrayList<>())
+					.savedRecipes(new ArrayList<>())
+					.reviews(new ArrayList<>())
+					.build();
+
 			userRepository.save(nuevoUsuario);
 			System.out.println("Usuario agregado con éxito: " + nuevoUsuario.getUsername());
+
 		} else {
-			Student nuevoEstudiante = new Student( null, request.getUsername(), null, null, request.getEmail(), request.getPassword(), null, null, null, false, new ArrayList<>(), request.getCardNumber(), request.getDniFrente(), request.getDniDorso(), request.getNroTramite(), 0 );
+			// También usamos el Builder para el Estudiante
+			Student nuevoEstudiante = Student.builder()
+					.username(request.getUsername())
+					.email(request.getEmail())
+					.password(request.getPassword())
+					.firstName(request.getFirstName())
+					.lastName(request.getLastName())
+					.phone(request.getPhone())
+					.address(request.getAddress())
+					.urlAvatar(request.getUrlAvatar())
+					.permissionGranted(false)
+					.attendedCourses(new ArrayList<>())
+					.cardNumber(request.getCardNumber())
+					.dniFrente(request.getDniFrente())
+					.dniDorso(request.getDniDorso())
+					.nroTramite(request.getNroTramite())
+					.cuentaCorriente(0)
+					.nroDocumento(request.getNroDocumento())
+					.tipoTarjeta(request.getTipoTarjeta())
+					.build();
+
 			studentRepository.save(nuevoEstudiante);
 			System.out.println("Estudiante agregado con éxito: " + nuevoEstudiante.getUsername());
 		}
@@ -133,10 +169,26 @@ public class Controlador {
 		System.out.println("Usuario eliminado: " + userId);
 	}
 
-	public Student cambiarAEstudiante(Long id, Student student) throws Exception{
-		Student nuevoEstudiante;
-		User usuarioACambiar = userRepository.findById(id).orElseThrow(()-> new UserException("No existe el usuario con el id" + id));
-		nuevoEstudiante = new Student(null, usuarioACambiar.getUsername(), null,null, usuarioACambiar.getEmail(), usuarioACambiar.getPassword(), null,  null,  null,  false, new ArrayList<>(), student.getCardNumber(),student.getDniFrente(), student.getDniDorso(), student.getNroTramite(), student.getCuentaCorriente());
+	public Student cambiarAEstudiante(Long id, Student student) throws Exception {
+		User usuarioACambiar = userRepository.findById(id)
+				.orElseThrow(() -> new UserException("No existe el usuario con el id " + id));
+
+		// Usamos el Builder para que el código sea más claro y no dependa del orden del constructor
+		Student nuevoEstudiante = Student.builder()
+				.username(usuarioACambiar.getUsername())
+				.email(usuarioACambiar.getEmail())
+				.password(usuarioACambiar.getPassword())
+				.permissionGranted(false)
+				.attendedCourses(new ArrayList<>())
+				.cardNumber(student.getCardNumber())
+				.dniFrente(student.getDniFrente())
+				.dniDorso(student.getDniDorso())
+				.nroTramite(student.getNroTramite())
+				.cuentaCorriente(student.getCuentaCorriente())
+				// Los nuevos campos (nroDocumento, tipoTarjeta) no se establecen aquí,
+				// por lo que serán null por defecto, lo cual es correcto para esta lógica de conversión.
+				.build();
+
 		studentRepository.save(nuevoEstudiante);
 		System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
 		eliminarUsuario(id);
@@ -158,7 +210,6 @@ public class Controlador {
 		return userRepository.findByUsername(username);
 	}
 
-	// --- MÉTODO DE LOGIN ACTUALIZADO Y REEMPLAZADO ---
 	public AuthenticationResponse loginUsuario(LoginRequest request) {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())

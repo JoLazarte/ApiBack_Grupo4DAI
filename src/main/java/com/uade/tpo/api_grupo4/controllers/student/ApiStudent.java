@@ -51,10 +51,4 @@ public class ApiStudent {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
         }
     }
-
-    @PostMapping("/loginStudent")
-    public ResponseEntity<Boolean> login(@RequestBody LoginRequest loginRequest) throws Exception {
-        boolean resultado = controlador.loginEstudiante(loginRequest);
-        return ResponseEntity.ok(resultado);
-    }
 }

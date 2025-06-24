@@ -1,4 +1,6 @@
+// Archivo: StudentView.java (Versión Corregida y Final)
 package com.uade.tpo.api_grupo4.controllers.student;
+
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -6,26 +8,15 @@ import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 import com.uade.tpo.api_grupo4.entity.CourseAttended;
 import com.uade.tpo.api_grupo4.entity.Student;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
-@AllArgsConstructor
-@NoArgsConstructor
-public class StudentView extends PersonView{
+@EqualsAndHashCode(callSuper = true) // <-- Corregido para herencia
+@NoArgsConstructor // Lombok usará el constructor de abajo
+public class StudentView extends PersonView {
 
-    private String username;
-    private String firstName; 
-    private String lastName;
-    private String email;
-    private String password;
-    private String phone;
-    private String address;
-    private String urlAvatar;
-    private Boolean permissionGranted;
     @JsonIgnore
     private List<CourseAttended> attendedCourses;
     private String cardNumber;
@@ -33,48 +24,50 @@ public class StudentView extends PersonView{
     private String dniDorso;
     private String nroTramite;
     private int cuentaCorriente;
+    private String nroDocumento;
+    private String tipoTarjeta;
 
+    // ---> CONSTRUCTOR CORREGIDO USANDO SUPER() <---
     public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
-            String phone, String address, String urlAvatar, Boolean permissionGranted,
-            List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente) {
-        this.id = id;
-        this.username = username;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
-        this.address = address;
-        this.urlAvatar = urlAvatar;
-        this.permissionGranted = permissionGranted;
+                       String phone, String address, String urlAvatar, Boolean permissionGranted,
+                       List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
+                       String nroDocumento, String tipoTarjeta) {
+
+        // 1. Llamamos al constructor del padre (PersonView) para que él asigne sus campos.
+        super(id, username, firstName, lastName, email, password, phone, address, urlAvatar, permissionGranted);
+
+        // 2. Aquí solo asignamos los campos propios de StudentView.
         this.attendedCourses = attendedCourses;
         this.cardNumber = cardNumber;
         this.dniFrente = dniFrente;
         this.dniDorso = dniDorso;
         this.nroTramite = nroTramite;
         this.cuentaCorriente = cuentaCorriente;
+        this.nroDocumento = nroDocumento;
+        this.tipoTarjeta = tipoTarjeta;
     }
 
-    public Student toEntity(){
-        return new Student(
-                this.id,
-                this.username, 
-                this.firstName, 
-                this.lastName, 
-                this.email, 
-                this.password, 
-                this.phone, 
-                this.address, 
-                this.urlAvatar, 
-                this.permissionGranted,
-                this.attendedCourses,
-                this.cardNumber,
-                this.dniFrente,
-                this.dniDorso,
-                this.nroTramite,
-                this.cuentaCorriente
-              
-        );
-    }   
-    
+    // ---> MÉTODO toEntity() CORREGIDO USANDO GETTERS <---
+    public Student toEntity() {
+        return Student.builder()
+                .id(this.getId()) // Usamos getters para los campos del padre
+                .username(this.getUsername())
+                .firstName(this.getFirstName())
+                .lastName(this.getLastName())
+                .email(this.getEmail())
+                .password(this.getPassword())
+                .phone(this.getPhone())
+                .address(this.getAddress())
+                .urlAvatar(this.getUrlAvatar())
+                .permissionGranted(this.getPermissionGranted())
+                .attendedCourses(this.attendedCourses) // Los campos propios se pueden acceder directamente
+                .cardNumber(this.cardNumber)
+                .dniFrente(this.dniFrente)
+                .dniDorso(this.dniDorso)
+                .nroTramite(this.nroTramite)
+                .cuentaCorriente(this.cuentaCorriente)
+                .nroDocumento(this.nroDocumento)
+                .tipoTarjeta(this.tipoTarjeta)
+                .build();
+    }
 }
