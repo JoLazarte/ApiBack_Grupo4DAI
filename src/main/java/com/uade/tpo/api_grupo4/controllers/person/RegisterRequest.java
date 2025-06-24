@@ -1,3 +1,4 @@
+// Archivo: RegisterRequest.java
 package com.uade.tpo.api_grupo4.controllers.person;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
- 
+
     @NotNull
     private String username;
     @NotNull
@@ -19,5 +20,10 @@ public class RegisterRequest {
     private String password;
     @NotNull
     private Boolean permissionGranted;
-    
+
+    // ---> AÑADE LOS NUEVOS CAMPOS PARA EL ESTUDIANTE <---
+    private String cardNumber;
+    private String dniFrente;
+    private String dniDorso;
+    private String nroTramite;
 }

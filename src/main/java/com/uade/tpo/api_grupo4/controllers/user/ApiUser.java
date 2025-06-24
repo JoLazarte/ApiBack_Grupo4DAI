@@ -15,6 +15,9 @@ import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 
+import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
+
+
 
 @RestController
 @RequestMapping("/apiUser")
@@ -64,9 +67,10 @@ public class ApiUser {
     }
 
     @PostMapping("/loginUser")
-    public ResponseEntity<Boolean> login(@RequestBody LoginRequest loginRequest) throws Exception {
-        boolean resultado = controlador.loginUsuario(loginRequest);
-        return ResponseEntity.ok(resultado);
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
+        // Ahora la línea es más simple: solo llama al método del controlador
+        // y devuelve directamente la respuesta que este le da.
+        return ResponseEntity.ok(controlador.loginUsuario(loginRequest));
     }
 
     @PostMapping("/toStudent")
