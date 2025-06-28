@@ -33,5 +33,9 @@ public class Course {
     @JoinColumn(name = "coursSchedule_id")
     @JsonManagedReference
     private CourseSchedule courseSchedule;
+
+    public void assignCourseSched(CourseSchedule courseSchedule) {
+        this.courseSchedule.setCourse(this);
+    }
     
 }
