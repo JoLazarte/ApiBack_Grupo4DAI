@@ -32,6 +32,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -391,7 +392,7 @@ public class Controlador {
 		List<Student> estudiantesConCursos = new ArrayList<>();
 		
 		List<Course> existeListaCursos = student.getCourses(); //el estudiante ya tiene una lista de cursos en la BD?
-		if( existeListaCursos == null){
+		if( existeListaCursos.isEmpty()){
 			cursosATomar.add(course);
 			student.setCourses(cursosATomar);
 		} else {
@@ -399,7 +400,7 @@ public class Controlador {
 		}
 
 		List<Student> existeListaEstudiantes = course.getStudents();// el curso ya fue seleccionado por algun estudiante?
-		if(existeListaEstudiantes == null){
+		if(existeListaEstudiantes.isEmpty()){
 			estudiantesConCursos.add(student);
 			course.setStudents(estudiantesConCursos);
 		} else {
@@ -444,7 +445,6 @@ public class Controlador {
 
 	public void inicializarSedes() throws Exception {
 		try{	
-    
             Headquarter headquarter1 = new Headquarter(null, "Caballito","45678889003", "Rosario 789", "sedecaballitotl@gmail.com", "+5491130561833", "20% de reintegro", 0.2, "-70% descuento", 0.7);
             Headquarter headquarter2 = new Headquarter(null, "Devoto", "43445567880", "Chivilcoy 3700", "sededevototl@gmail.com", "+5491120443789", "30% de reintegro", 0.3, "-70% descuento", 0.7);
             Headquarter headquarter3 = new Headquarter(null, "Retiro","44293778034", "Pelegrini 1500", "sederetirotl@gmail.com", "+5491129387029", "25% de reintegro", 0.25, "-60% descuento", 0.6);
@@ -473,7 +473,18 @@ public class Controlador {
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	
+	public void tomarAsistencia(Long studentId, Long courseSchedId){
+		//verifico que existan tanto el estudiante como el cronograma ingresados:
+		CourseSchedule courseSched = courseSchedRepository.findById(courseSchedId).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + courseSchedId + " no existe."));
+		Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+		
+		CourseAttended courseAttended = CourseAttended.builder()
+				.courseSchedule(courseSched)
+				.student(student)
+				.fechaAsistencia(LocalDate.now())
+				.build();
+		courseAttendRepository.save(courseAttended);
+	}
 
 	
 }
