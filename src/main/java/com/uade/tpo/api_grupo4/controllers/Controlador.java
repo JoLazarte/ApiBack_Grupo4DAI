@@ -103,7 +103,7 @@ public class Controlador {
 					.address(request.getAddress())
 					.urlAvatar(request.getUrlAvatar())
 					.permissionGranted(false)
-					.attendedCourses(new ArrayList<>())
+					.courses(new ArrayList<>())
 					.cardNumber(request.getCardNumber())
 					.dniFrente(request.getDniFrente())
 					.dniDorso(request.getDniDorso())
@@ -231,7 +231,7 @@ public class Controlador {
 	public Student agregarEstudiante(Long id, Student student) throws StudentException {
 		return studentRepository.findById(id)
 				.map(existingStudent -> {
-					existingStudent.setAttendedCourses(new ArrayList<>());
+					existingStudent.setCourses(new ArrayList<>());
 					existingStudent.setCardNumber(student.getCardNumber());
 					existingStudent.setDniFrente(student.getDniFrente());
 					existingStudent.setDniDorso(student.getDniDorso());
@@ -300,12 +300,14 @@ public class Controlador {
 				.email(usuarioACambiar.getEmail())
 				.password(usuarioACambiar.getPassword())
 				.permissionGranted(false)
-				.attendedCourses(new ArrayList<>())
+				.courses(new ArrayList<>())
 				.cardNumber(student.getCardNumber())
 				.dniFrente(student.getDniFrente())
 				.dniDorso(student.getDniDorso())
 				.nroTramite(student.getNroTramite())
 				.cuentaCorriente(student.getCuentaCorriente())
+				.tipoTarjeta(student.getTipoTarjeta())
+				.nroDocumento(student.getNroDocumento())
 				.build();
 
 		studentRepository.save(nuevoEstudiante);
@@ -354,17 +356,17 @@ public class Controlador {
 
         	CourseSchedule courseSchedule1 = new CourseSchedule();
 			courseSchedRepository.save(courseSchedule1);
-            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. Descubrí alimentos esenciales en la cocina vegana, como legumbres, frutos secos, semillas, verduras, frutas y granos integrales. Experimenta con diferentes sustituciones de ingredientes para adaptar tus recetas favoritas al estilo vegano.", "No necesitas conocimientos previos.", 120, 600.0, CourseMode.MIXTO, courseSchedule1);
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. Descubrí alimentos esenciales en la cocina vegana, como legumbres, frutos secos, semillas, verduras, frutas y granos integrales. Experimenta con diferentes sustituciones de ingredientes para adaptar tus recetas favoritas al estilo vegano.", "No necesitas conocimientos previos.", 120, 600.0, CourseMode.MIXTO, courseSchedule1, new ArrayList<>());
             course1.assignCourseSched(courseSchedule1);
 
             CourseSchedule courseSchedule2 = new CourseSchedule();
 			courseSchedRepository.save(courseSchedule2);
-            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas: Saltear, freír, cocinar al vapor y estofar. Explorá ingredientes clave: Arroz, fideos, soja, diferentes tipos de verduras y especias. Investiga sobre sus usos y combinaciones para enriquecer tus preparaciones. Experimentá con diferentes regiones: Explora platos de China, Japón, Tailandia, Vietnam y otros países ", "Conocimientos básicos de cocina.", 180, 800.0, CourseMode.PRESENCIAL, courseSchedule2);
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas: Saltear, freír, cocinar al vapor y estofar. Explorá ingredientes clave: Arroz, fideos, soja, diferentes tipos de verduras y especias. Investiga sobre sus usos y combinaciones para enriquecer tus preparaciones. Experimentá con diferentes regiones: Explora platos de China, Japón, Tailandia, Vietnam y otros países ", "Conocimientos básicos de cocina.", 180, 800.0, CourseMode.PRESENCIAL, courseSchedule2, new ArrayList<>());
             course1.assignCourseSched(courseSchedule2);
 
             CourseSchedule courseSchedule3 = new CourseSchedule();
 			courseSchedRepository.save(courseSchedule3);
-            Course course3 = new Course(null, "Reposteria Cacera", "Desde tu hogar, aprenderás a conocer y a elegir los ingredientes, como también la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, courseSchedule3);
+            Course course3 = new Course(null, "Reposteria Cacera", "Desde tu hogar, aprenderás a conocer y a elegir los ingredientes, como también la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, courseSchedule3, new ArrayList<>());
             course1.assignCourseSched(courseSchedule3);
 
             courseRepository.save(course1); 
@@ -378,6 +380,37 @@ public class Controlador {
 				throw new Exception("[Controlador.inicializarCursos] -> " + error.getMessage());
 			}
     	}
+
+	public void seleccionarCursos(Long studentId, Long courseId){
+		//verifico que existan tanto el estudiante como el curso seleccionado:
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("El curso con id " + courseId + " no existe."));
+		Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+		
+		//definino listas nuevas por si el estudiante y/o el cuerso no tienen guardados cursos/estudiantes
+		List<Course> cursosATomar = new ArrayList<>();
+		List<Student> estudiantesConCursos = new ArrayList<>();
+		
+		List<Course> existeListaCursos = student.getCourses(); //el estudiante ya tiene una lista de cursos en la BD?
+		if( existeListaCursos == null){
+			cursosATomar.add(course);
+			student.setCourses(cursosATomar);
+		} else {
+			existeListaCursos.add(course);
+		}
+
+		List<Student> existeListaEstudiantes = course.getStudents();// el curso ya fue seleccionado por algun estudiante?
+		if(existeListaEstudiantes == null){
+			estudiantesConCursos.add(student);
+			course.setStudents(estudiantesConCursos);
+		} else {
+			existeListaEstudiantes.add(student);
+		}
+		
+		studentRepository.save(student);
+		courseRepository.save(course);
+		
+	}
+
 
 	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -440,18 +473,7 @@ public class Controlador {
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public void seleccionarCursos(Long studentId, Course course){
 	
-		Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
-		List<Course> cursosDisponibles = todosLosCursos();
-		
-		if(cursosDisponibles.contains(course)){
-			CourseAttended courseAttend = new CourseAttended(null, course.getCourseSchedule(), student);
-			
-			courseAttendRepository.save(courseAttend);
-		
-		}
-	}
 
 	
 }

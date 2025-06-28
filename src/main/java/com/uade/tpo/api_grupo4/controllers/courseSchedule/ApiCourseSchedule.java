@@ -43,9 +43,9 @@ public class ApiCourseSchedule {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
 
         } catch (Exception error) {
-        System.out.printf("[CartController.addItemToCart] -> %s", error.getMessage());
+        System.out.printf("[ApiCourseSchedule.completarCronogramaParaCurso] -> %s", error.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ResponseData.error("No se pudo agregar el item al carro"));
+            .body(ResponseData.error("No se pudo completar el cronograma"));
         }
     }
     

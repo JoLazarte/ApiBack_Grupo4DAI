@@ -1,5 +1,7 @@
 package com.uade.tpo.api_grupo4.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -8,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +36,8 @@ public class Course {
     @JoinColumn(name = "coursSchedule_id")
     @JsonManagedReference
     private CourseSchedule courseSchedule;
+    @ManyToMany(mappedBy = "courses")
+    private List<Student> students;
 
     public void assignCourseSched(CourseSchedule courseSchedule) {
         this.courseSchedule.setCourse(this);

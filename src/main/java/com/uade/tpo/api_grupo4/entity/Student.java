@@ -27,10 +27,10 @@ public class Student extends Person implements UserDetails {
 
     @ManyToMany
     @JoinTable(
-            name = "attendedCourse_student",
+            name = "course_student",
             joinColumns = @JoinColumn(name = "student_id"),
-            inverseJoinColumns = @JoinColumn(name = "attendedCourse_id"))
-    private List<CourseAttended> attendedCourses;
+            inverseJoinColumns = @JoinColumn(name = "course_id"))
+    private List<Course> courses;
 
     private String cardNumber;
     @Column(columnDefinition = "LONGTEXT")
@@ -46,7 +46,7 @@ public class Student extends Person implements UserDetails {
     public StudentView toView(){
         return new StudentView(
                 this.id, this.username, this.firstName, this.lastName, this.email, this.password,
-                this.phone, this.address, this.urlAvatar, this.permissionGranted, this.attendedCourses,
+                this.phone, this.address, this.urlAvatar, this.permissionGranted, this.courses,
                 this.cardNumber, this.dniFrente, this.dniDorso, this.nroTramite, this.cuentaCorriente,
                 this.nroDocumento, this.tipoTarjeta
         );

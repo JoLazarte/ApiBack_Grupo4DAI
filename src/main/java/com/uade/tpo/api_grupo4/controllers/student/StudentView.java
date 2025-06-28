@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uade.tpo.api_grupo4.controllers.person.PersonView;
-import com.uade.tpo.api_grupo4.entity.CourseAttended;
+import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.Student;
 
 import lombok.Data;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class StudentView extends PersonView {
 
     @JsonIgnore
-    private List<CourseAttended> attendedCourses;
+    private List<Course> courses;
     private String cardNumber;
     private String dniFrente;
     private String dniDorso;
@@ -30,14 +30,14 @@ public class StudentView extends PersonView {
     // ---> CONSTRUCTOR CORREGIDO USANDO SUPER() <---
     public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
                        String phone, String address, String urlAvatar, Boolean permissionGranted,
-                       List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
+                       List<Course> courses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
                        String nroDocumento, String tipoTarjeta) {
 
         // 1. Llamamos al constructor del padre (PersonView) para que él asigne sus campos.
         super(id, username, firstName, lastName, email, password, phone, address, urlAvatar, permissionGranted);
 
         // 2. Aquí solo asignamos los campos propios de StudentView.
-        this.attendedCourses = attendedCourses;
+        this.courses = courses;
         this.cardNumber = cardNumber;
         this.dniFrente = dniFrente;
         this.dniDorso = dniDorso;
@@ -60,7 +60,7 @@ public class StudentView extends PersonView {
                 .address(this.getAddress())
                 .urlAvatar(this.getUrlAvatar())
                 .permissionGranted(this.getPermissionGranted())
-                .attendedCourses(this.attendedCourses) // Los campos propios se pueden acceder directamente
+                .courses(this.courses) // Los campos propios se pueden acceder directamente
                 .cardNumber(this.cardNumber)
                 .dniFrente(this.dniFrente)
                 .dniDorso(this.dniDorso)
