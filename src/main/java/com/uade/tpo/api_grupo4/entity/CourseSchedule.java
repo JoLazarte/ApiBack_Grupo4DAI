@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -12,8 +13,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,11 +28,6 @@ public class CourseSchedule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToMany
-    @JoinTable(
-    name = "courseScheduled_headq", 
-    joinColumns = @JoinColumn(name = "courseShedule_id"), 
-    inverseJoinColumns = @JoinColumn(name = "headquarter_id"))
     private List<Headquarter> headquarters;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "course_id")
@@ -42,4 +36,14 @@ public class CourseSchedule implements Serializable {
     private LocalDate startDate;
     private LocalDate completionDate;
     private int vacancy;
+
+    public CourseScheduleView toView() {
+        return new CourseScheduleView(
+                this.id,
+                this.headquarters,
+                this.course,
+                this.startDate,
+                this.completionDate,
+                this.vacancy);
+    }
 }

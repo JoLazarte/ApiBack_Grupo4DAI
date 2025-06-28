@@ -5,10 +5,20 @@ package com.uade.tpo.api_grupo4.controllers;
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
+import com.uade.tpo.api_grupo4.entity.Course;
+import com.uade.tpo.api_grupo4.entity.CourseMode;
+import com.uade.tpo.api_grupo4.entity.CourseSchedule;
+import com.uade.tpo.api_grupo4.entity.Headquarter;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
+import com.uade.tpo.api_grupo4.exceptions.CourseException;
+import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
+import com.uade.tpo.api_grupo4.exceptions.HeadquarterException;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
+import com.uade.tpo.api_grupo4.repository.CourseRepository;
+import com.uade.tpo.api_grupo4.repository.CourseScheduleRepository;
+import com.uade.tpo.api_grupo4.repository.HeadquarterRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
@@ -22,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Service
 @RequiredArgsConstructor // Crea un constructor con todos los campos 'final' para la inyección
 public class Controlador {
@@ -29,6 +40,9 @@ public class Controlador {
 	// CAMBIO: Inyección de dependencias a través de campos 'final'
 	private final StudentRepository studentRepository;
 	private final UserRepository userRepository;
+	private final CourseRepository courseRepository;
+	private final CourseScheduleRepository courseSchedRepository;
+	private final HeadquarterRepository headquarterRepository;
 	private final RecipeRepository recipeRepository;
 
 	// NUEVO: Inyectamos los servicios que necesitamos para el login JWT
@@ -63,6 +77,8 @@ public class Controlador {
 					existingStudent.setDniDorso(student.getDniDorso());
 					existingStudent.setNroTramite(student.getNroTramite());
 					existingStudent.setCuentaCorriente(student.getCuentaCorriente());
+					existingStudent.setNroDocumento(student.getNroDocumento());
+					existingStudent.setTipoTarjeta(student.getTipoTarjeta());
 					return studentRepository.save(existingStudent);
 				})
 				.orElseThrow(()-> new StudentException("No existe el estudiante con el id" + id));
@@ -185,8 +201,9 @@ public class Controlador {
 				.dniDorso(student.getDniDorso())
 				.nroTramite(student.getNroTramite())
 				.cuentaCorriente(student.getCuentaCorriente())
-				// Los nuevos campos (nroDocumento, tipoTarjeta) no se establecen aquí,
-				// por lo que serán null por defecto, lo cual es correcto para esta lógica de conversión.
+				.nroDocumento(student.getNroDocumento())
+				.tipoTarjeta(student.getTipoTarjeta())
+				// Los nuevos campos (nroDocumento, tipoTarjeta) si irian aquí, porque debe completarse el registro de estudiante por completo.
 				.build();
 
 		studentRepository.save(nuevoEstudiante);
@@ -218,4 +235,115 @@ public class Controlador {
 		String jwtToken = jwtService.generateToken(user);
 		return AuthenticationResponse.builder().token(jwtToken).build();
 	}
+
+	//-----------------------------------------------Courses--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	public List<Course> todosLosCursos() throws CourseException {
+			List<Course> cursos = courseRepository.findAll();
+			if (cursos.isEmpty()) {
+				throw new CourseException("No se encontraron cursos en la base de datos.");
+			}
+			return cursos;
+	}
+
+	public Course getCourseByName(String name) throws Exception {
+		try{
+			return courseRepository.findByName(name).orElseThrow(() -> new CourseException("Curso no encontrado"));
+		} catch (CourseException error) {
+			throw new CourseException(error.getMessage());
+		} catch (Exception error) {
+			throw new Exception("[Controlador.getCourseByName] -> " + error.getMessage());
+		}
+	}
+
+	public void inicializarCursos() throws Exception {
+		try{	
+
+        	CourseSchedule courseSchedule1 = new CourseSchedule();
+			courseSchedRepository.save(courseSchedule1);
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. Descubrí alimentos esenciales en la cocina vegana, como legumbres, frutos secos, semillas, verduras, frutas y granos integrales. Experimenta con diferentes sustituciones de ingredientes para adaptar tus recetas favoritas al estilo vegano.", "No necesitas conocimientos previos.", 120, 600.0, CourseMode.MIXTO, courseSchedule1);
+            course1.assignCourseSched(courseSchedule1);
+
+            CourseSchedule courseSchedule2 = new CourseSchedule();
+			courseSchedRepository.save(courseSchedule2);
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas: Saltear, freír, cocinar al vapor y estofar. Explorá ingredientes clave: Arroz, fideos, soja, diferentes tipos de verduras y especias. Investiga sobre sus usos y combinaciones para enriquecer tus preparaciones. Experimentá con diferentes regiones: Explora platos de China, Japón, Tailandia, Vietnam y otros países ", "Conocimientos básicos de cocina.", 180, 800.0, CourseMode.PRESENCIAL, courseSchedule2);
+            course1.assignCourseSched(courseSchedule2);
+
+            CourseSchedule courseSchedule3 = new CourseSchedule();
+			courseSchedRepository.save(courseSchedule3);
+            Course course3 = new Course(null, "Reposteria Cacera", "Desde tu hogar, aprenderás a conocer y a elegir los ingredientes, como también la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, courseSchedule3);
+            course1.assignCourseSched(courseSchedule3);
+
+            courseRepository.save(course1); 
+			courseRepository.save(cours2);
+			courseRepository.save(course3);
+
+		 } catch (CourseException error) {
+
+        	throw new CourseException(error.getMessage());
+      } catch (Exception error) {
+				throw new Exception("[Controlador.inicializarCursos] -> " + error.getMessage());
+			}
+    	}
+
+	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	public CourseSchedule completarCronogramaParaCurso(String courseName, CourseSchedule courseSchedule) throws Exception {
+		Course cursoExistente = getCourseByName(courseName);
+        CourseSchedule courseScheduleAsociado = cursoExistente.getCourseSchedule();
+		List<Headquarter> headquarters = todosLasSedes();
+		
+		return courseSchedRepository.findById(courseScheduleAsociado.getId())
+				.map(existingCourseSchedule -> {
+					existingCourseSchedule.setHeadquarters(headquarters);
+					existingCourseSchedule.setCourse(cursoExistente);
+					existingCourseSchedule.setStartDate(courseSchedule.getStartDate());
+					existingCourseSchedule.setCompletionDate(courseSchedule.getCompletionDate());
+					existingCourseSchedule.setVacancy(courseSchedule.getVacancy());
+					
+					return courseSchedRepository.save(existingCourseSchedule);
+				})
+				.orElseThrow(()-> new CourseScheduleException("No existe el cronograma con el id" + courseScheduleAsociado.getId()));
+	}
+
+	//-----------------------------------------------Headquarters--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	public List<Headquarter> todosLasSedes() throws HeadquarterException {
+			List<Headquarter> sedes = headquarterRepository.findAll();
+			if (sedes.isEmpty()) {
+				throw new HeadquarterException("No se encontraron sedes en la base de datos.");
+			}
+			return sedes;
+	}
+
+	public void inicializarSedes() throws Exception {
+		try{	
+    
+            Headquarter headquarter1 = new Headquarter(null, "Caballito","45678889003", "Rosario 789", "sedecaballitotl@gmail.com", "+5491130561833", "20% de reintegro", 0.2, "-70% descuento", 0.7);
+            Headquarter headquarter2 = new Headquarter(null, "Devoto", "43445567880", "Chivilcoy 3700", "sededevototl@gmail.com", "+5491120443789", "30% de reintegro", 0.3, "-70% descuento", 0.7);
+            Headquarter headquarter3 = new Headquarter(null, "Retiro","44293778034", "Pelegrini 1500", "sederetirotl@gmail.com", "+5491129387029", "25% de reintegro", 0.25, "-60% descuento", 0.6);
+
+            headquarterRepository.save(headquarter1); 
+			headquarterRepository.save(headquarter2);
+			headquarterRepository.save(headquarter3);
+
+		 } catch (HeadquarterException error) {
+
+        	throw new HeadquarterException(error.getMessage());
+      } catch (Exception error) {
+				throw new Exception("[Controlador.inicializarCursos] -> " + error.getMessage());
+			}
+    	}
+
+	public Headquarter getHeadquarterByName(String name) throws Exception {
+		try{
+			return headquarterRepository.findByName(name).orElseThrow(() -> new HeadquarterException("Sede no encontrada"));
+		} catch (HeadquarterException error) {
+			throw new HeadquarterException(error.getMessage());
+		} catch (Exception error) {
+			throw new Exception("[Controlador.getCourseByName] -> " + error.getMessage());
+		}
+	}
+
+	
 }
