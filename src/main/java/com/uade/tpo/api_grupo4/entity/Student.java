@@ -1,11 +1,10 @@
 package com.uade.tpo.api_grupo4.entity;
 
-import java.util.Collection; // <-- NUEVA IMPORTACIÓN
+import java.util.Collection;
 import java.util.List;
-import org.springframework.security.core.GrantedAuthority; // <-- NUEVA IMPORTACIÓN
-import org.springframework.security.core.authority.SimpleGrantedAuthority; // <-- NUEVA IMPORTACIÓN
-import org.springframework.security.core.userdetails.UserDetails; // <-- NUEVA IMPORTACIÓN
-
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import com.uade.tpo.api_grupo4.controllers.student.StudentView;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +23,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-// PASO 1: AÑADIMOS "implements UserDetails"
 public class Student extends Person implements UserDetails {
 
     @ManyToMany
@@ -45,22 +43,6 @@ public class Student extends Person implements UserDetails {
     private String tipoTarjeta;
 
 
-    public Student(Long id, String username, String firstName, String lastName, String email, String password,
-                   String phone, String address, String urlAvatar, Boolean permissionGranted
-            ,List<CourseAttended> attendedCourses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente, String nroDocumento, String tipoTarjeta
-    ) {
-        super(id, username, firstName, lastName, email, password, phone, address, urlAvatar, permissionGranted);
-        this.attendedCourses = attendedCourses;
-        this.cardNumber = cardNumber;
-        this.dniFrente = dniFrente;
-        this.dniDorso = dniDorso;
-        this.nroTramite = nroTramite;
-        this.cuentaCorriente = cuentaCorriente;
-        this.nroDocumento = nroDocumento;
-        this.tipoTarjeta = tipoTarjeta;
-    }
-
-
     public StudentView toView(){
         return new StudentView(
                 this.id, this.username, this.firstName, this.lastName, this.email, this.password,
@@ -70,18 +52,10 @@ public class Student extends Person implements UserDetails {
         );
     }
 
-    // ====================================================================
-    // PASO 2: AÑADIMOS LOS MÉTODOS REQUERIDOS POR LA INTERFAZ UserDetails
-    // ====================================================================
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Le damos a todos los estudiantes el rol "STUDENT".
         return List.of(new SimpleGrantedAuthority("STUDENT"));
     }
-
-    // NOTA: getPassword() y getUsername() ya los provee la anotación @Data
-    // al heredar de Person, por lo que no necesitamos volver a escribirlos.
 
     @Override
     public boolean isAccountNonExpired() {
