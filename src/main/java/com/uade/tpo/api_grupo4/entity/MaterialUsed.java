@@ -26,7 +26,7 @@ public class MaterialUsed implements Serializable {
     private int quantity;
 
     private Unit unity;
-    private String observation;
+  
 
     
 }

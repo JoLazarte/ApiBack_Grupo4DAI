@@ -8,11 +8,14 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +31,7 @@ public class CourseSchedule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ElementCollection
     private List<Headquarter> headquarters;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "course_id")

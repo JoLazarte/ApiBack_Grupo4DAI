@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,5 +31,9 @@ public class Step implements Serializable {
     private Recipe recipe;
     private int numberOfStep;
     private String comment;
+    @Column(columnDefinition = "LONGTEXT")
+    private String imagenPaso;
+    @Column(columnDefinition = "LONGTEXT")
+    private String videoPaso;
 
 }

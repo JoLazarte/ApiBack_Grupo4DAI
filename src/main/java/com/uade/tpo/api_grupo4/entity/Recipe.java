@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -46,12 +47,9 @@ public class Recipe {
     name = "materialUsed_recipe", 
     joinColumns = @JoinColumn(name = "recipe_id"), 
     inverseJoinColumns = @JoinColumn(name = "materialUsed_id"))
-    private List<MaterialUsed> ingredients;       	
-    //@NotEmpty
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "picture_id")
-    @JsonBackReference 
-    private Picture mainPicture;
+    private List<MaterialUsed> ingredients;  
+    @Column(columnDefinition = "LONGTEXT")
+    private String mainPicture;
     private int servings;	
     private int comensales;	
     @ManyToOne

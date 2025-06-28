@@ -1,14 +1,14 @@
 package com.uade.tpo.api_grupo4.controllers;
-// Nota: Para una mejor organización, esta clase debería estar en un paquete 'service',
-// pero la mantendremos aquí para seguir tu estructura actual.
 
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
 import com.uade.tpo.api_grupo4.entity.Course;
+import com.uade.tpo.api_grupo4.entity.CourseAttended;
 import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
+import com.uade.tpo.api_grupo4.entity.PendingUser;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
@@ -16,12 +16,15 @@ import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 import com.uade.tpo.api_grupo4.exceptions.HeadquarterException;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
+import com.uade.tpo.api_grupo4.repository.CourseAttendRepository;
 import com.uade.tpo.api_grupo4.repository.CourseRepository;
 import com.uade.tpo.api_grupo4.repository.CourseScheduleRepository;
 import com.uade.tpo.api_grupo4.repository.HeadquarterRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
+import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
+import com.uade.tpo.api_grupo4.service.EmailService;
 import com.uade.tpo.api_grupo4.service.JwtService; // Asegúrate de importar tu JwtService
 
 import lombok.RequiredArgsConstructor;
@@ -29,27 +32,30 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 @Service
-@RequiredArgsConstructor // Crea un constructor con todos los campos 'final' para la inyección
+@RequiredArgsConstructor 
 public class Controlador {
 
-	// CAMBIO: Inyección de dependencias a través de campos 'final'
+	// Inyección de dependencias a través de campos 'final'
 	private final StudentRepository studentRepository;
 	private final UserRepository userRepository;
 	private final CourseRepository courseRepository;
 	private final CourseScheduleRepository courseSchedRepository;
 	private final HeadquarterRepository headquarterRepository;
+	private final CourseAttendRepository courseAttendRepository;
 	private final RecipeRepository recipeRepository;
 
-	// NUEVO: Inyectamos los servicios que necesitamos para el login JWT
+	//Inyectamos los servicios que necesitamos para el login JWT
 	private final JwtService jwtService;
 	private final AuthenticationManager authenticationManager;
-
-	// ELIMINADO: El patrón singleton manual (getInstancia, constructor privado, etc.)
+	private final PendingUserRepository pendingUserRepository;
+	private final EmailService emailService;
 
 	//-----------------------------------------------Metodos Publicos--------------------------------------------------------------------------------------------------------------------------------------------------------
 	public boolean aliasExists(String alias) {
@@ -58,6 +64,164 @@ public class Controlador {
 
 	public boolean emailExists(String email) {
 		return userRepository.existsByEmail(email) || studentRepository.existsByEmail(email);
+	}
+
+	//-----------------------------------------------Registro y Login--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+	//--------Registro--------
+	public void crearUsuarioGeneral(RegisterRequest request) throws UserException {
+		if (userRepository.existsByUsername(request.getUsername()) || studentRepository.existsByUsername(request.getUsername())) {
+			throw new UserException("El nombre de usuario '" + request.getUsername() + "' ya está en uso.");
+		}
+		if (userRepository.existsByEmail(request.getEmail()) || studentRepository.existsByEmail(request.getEmail())) {
+			throw new UserException("El correo electrónico '" + request.getEmail() + "' ya está registrado.");
+		}
+		if (request.getPermissionGranted() == true) {
+			User nuevoUsuario = User.builder()
+					.username(request.getUsername())
+					.email(request.getEmail())
+					.password(request.getPassword())
+					.firstName(request.getFirstName())
+					.lastName(request.getLastName())
+					.phone(request.getPhone())
+					.address(request.getAddress())
+					.urlAvatar(request.getUrlAvatar())
+					.permissionGranted(true)
+					.recipes(new ArrayList<>())
+					.savedRecipes(new ArrayList<>())
+					.reviews(new ArrayList<>())
+					.build();
+
+			userRepository.save(nuevoUsuario);
+			System.out.println("Usuario agregado con éxito: " + nuevoUsuario.getUsername());
+
+			} else {
+			Student nuevoEstudiante = Student.builder()
+					.username(request.getUsername())
+					.email(request.getEmail())
+					.password(request.getPassword())
+					.firstName(request.getFirstName())
+					.lastName(request.getLastName())
+					.phone(request.getPhone())
+					.address(request.getAddress())
+					.urlAvatar(request.getUrlAvatar())
+					.permissionGranted(false)
+					.attendedCourses(new ArrayList<>())
+					.cardNumber(request.getCardNumber())
+					.dniFrente(request.getDniFrente())
+					.dniDorso(request.getDniDorso())
+					.nroTramite(request.getNroTramite())
+					.cuentaCorriente(0)
+					.nroDocumento(request.getNroDocumento())
+					.tipoTarjeta(request.getTipoTarjeta())
+					.build();
+
+			studentRepository.save(nuevoEstudiante);
+			System.out.println("Estudiante agregado con éxito: " + nuevoEstudiante.getUsername());
+		}
+	}
+
+	//--------Login--------
+	public AuthenticationResponse loginUsuario(LoginRequest request) throws Exception {
+
+		User user = userRepository.findByUsername(request.getUsername());
+
+		if (user != null) {
+			if (user.getPassword().equals(request.getPassword())) {
+				String jwtToken = jwtService.generateToken(user);
+				return AuthenticationResponse.builder().token(jwtToken).build();
+			}
+		} else {
+			Student student = studentRepository.findByUsername(request.getUsername());
+
+			if (student != null) {
+				if (student.getPassword().equals(request.getPassword())) {
+					String jwtToken = jwtService.generateToken(student);
+					return AuthenticationResponse.builder().token(jwtToken).build();
+				}
+			}
+		}
+
+		throw new Exception("Credenciales incorrectas");
+	}
+
+	//--------Iniciar Registro--------
+
+	public void iniciarRegistro(RegisterRequest request) throws UserException {
+		// Las validaciones de alias y email existentes se mantienen
+		if (aliasExists(request.getUsername())) {
+			throw new UserException("El nombre de usuario '" + request.getUsername() + "' ya está en uso.");
+		}
+		if (emailExists(request.getEmail())) {
+			throw new UserException("El correo electrónico '" + request.getEmail() + "' ya está registrado.");
+		}
+
+		// 1. Generamos un código aleatorio de 4 dígitos
+		String code = String.format("%04d", new Random().nextInt(10000));
+
+		// 2. Creamos el objeto de usuario pendiente con todos los datos
+		PendingUser pendingUser = PendingUser.builder()
+				.username(request.getUsername()).email(request.getEmail()).password(request.getPassword())
+				.firstName(request.getFirstName()).lastName(request.getLastName()).phone(request.getPhone())
+				.address(request.getAddress()).urlAvatar(request.getUrlAvatar())
+				.permissionGranted(request.getPermissionGranted())
+				.cardNumber(request.getCardNumber()).nroTramite(request.getNroTramite())
+				.nroDocumento(request.getNroDocumento()).tipoTarjeta(request.getTipoTarjeta())
+				.dniFrente(request.getDniFrente()).dniDorso(request.getDniDorso())
+				.verificationCode(code)
+				.expiryDate(LocalDateTime.now().plusMinutes(15)) // El código expira en 15 minutos
+				.build();
+
+		// 3. Guardamos el registro pendiente en la nueva tabla
+		pendingUserRepository.save(pendingUser);
+
+		// 4. Enviamos el correo
+		emailService.sendVerificationCode(pendingUser.getEmail(), code);
+	}
+
+	//--------Finalizar Registro--------
+	// (Necesitaremos un nuevo DTO para la petición, por ahora usamos los parámetros directamente)
+	public void finalizarRegistro(String email, String code) throws UserException {
+		// 1. Buscamos el registro pendiente
+		PendingUser pendingUser = pendingUserRepository.findById(email)
+				.orElseThrow(() -> new UserException("No se encontró un registro pendiente para este email. Puede que haya expirado."));
+
+		// 2. Verificamos si el código ha expirado
+		if (pendingUser.getExpiryDate().isBefore(LocalDateTime.now())) {
+			pendingUserRepository.delete(pendingUser); // Lo borramos si expiró
+			throw new UserException("El código de verificación ha expirado. Por favor, intenta registrarte de nuevo.");
+		}
+
+		// 3. Verificamos si el código es correcto
+		if (!pendingUser.getVerificationCode().equals(code)) {
+			throw new UserException("El código de verificación es incorrecto.");
+		}
+
+		// 4. --- ESTE ES EL ARREGLO ---
+		// Creamos el objeto final y copiamos TODOS los datos desde el usuario pendiente
+		RegisterRequest finalRequest = new RegisterRequest();
+		finalRequest.setUsername(pendingUser.getUsername());
+		finalRequest.setEmail(pendingUser.getEmail());
+		finalRequest.setPassword(pendingUser.getPassword());
+		finalRequest.setFirstName(pendingUser.getFirstName());
+		finalRequest.setLastName(pendingUser.getLastName());
+		finalRequest.setPhone(pendingUser.getPhone());
+		finalRequest.setAddress(pendingUser.getAddress());
+		finalRequest.setUrlAvatar(pendingUser.getUrlAvatar());
+		finalRequest.setPermissionGranted(pendingUser.getPermissionGranted());
+		finalRequest.setCardNumber(pendingUser.getCardNumber());
+		finalRequest.setDniFrente(pendingUser.getDniFrente());
+		finalRequest.setDniDorso(pendingUser.getDniDorso());
+		finalRequest.setNroTramite(pendingUser.getNroTramite());
+		finalRequest.setNroDocumento(pendingUser.getNroDocumento());
+		finalRequest.setTipoTarjeta(pendingUser.getTipoTarjeta());
+
+		// 5. Llamamos a nuestro método de creación original con el objeto ya completo
+		crearUsuarioGeneral(finalRequest);
+
+		// 6. Si todo fue bien, borramos el registro pendiente para que no se pueda volver a usar
+		pendingUserRepository.delete(pendingUser);
 	}
 
 	//-----------------------------------------------Students--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,61 +288,6 @@ public class Controlador {
 		return usuarios;
 	}
 
-	public void crearUsuarioGeneral(RegisterRequest request) throws UserException {
-		if (userRepository.existsByUsername(request.getUsername()) || studentRepository.existsByUsername(request.getUsername())) {
-			throw new UserException("El nombre de usuario '" + request.getUsername() + "' ya está en uso.");
-		}
-		if (userRepository.existsByEmail(request.getEmail()) || studentRepository.existsByEmail(request.getEmail())) {
-			throw new UserException("El correo electrónico '" + request.getEmail() + "' ya está registrado.");
-		}
-
-		if (request.getPermissionGranted() == true) {
-			// Usamos el Builder para construir el objeto de forma más clara
-			User nuevoUsuario = User.builder()
-					.username(request.getUsername())
-					.email(request.getEmail())
-					.password(request.getPassword()) // NOTA: Aquí deberías codificar la contraseña antes de guardarla. Lo veremos después.
-					.firstName(request.getFirstName())
-					.lastName(request.getLastName())
-					.phone(request.getPhone())
-					.address(request.getAddress())
-					.urlAvatar(request.getUrlAvatar())
-					.permissionGranted(true)
-					.recipes(new ArrayList<>())
-					.savedRecipes(new ArrayList<>())
-					.reviews(new ArrayList<>())
-					.build();
-
-			userRepository.save(nuevoUsuario);
-			System.out.println("Usuario agregado con éxito: " + nuevoUsuario.getUsername());
-
-		} else {
-			// También usamos el Builder para el Estudiante
-			Student nuevoEstudiante = Student.builder()
-					.username(request.getUsername())
-					.email(request.getEmail())
-					.password(request.getPassword())
-					.firstName(request.getFirstName())
-					.lastName(request.getLastName())
-					.phone(request.getPhone())
-					.address(request.getAddress())
-					.urlAvatar(request.getUrlAvatar())
-					.permissionGranted(false)
-					.attendedCourses(new ArrayList<>())
-					.cardNumber(request.getCardNumber())
-					.dniFrente(request.getDniFrente())
-					.dniDorso(request.getDniDorso())
-					.nroTramite(request.getNroTramite())
-					.cuentaCorriente(0)
-					.nroDocumento(request.getNroDocumento())
-					.tipoTarjeta(request.getTipoTarjeta())
-					.build();
-
-			studentRepository.save(nuevoEstudiante);
-			System.out.println("Estudiante agregado con éxito: " + nuevoEstudiante.getUsername());
-		}
-	}
-
 	public void eliminarUsuario(Long userId) throws UserException {
 		User usuario = userRepository.findById(userId).orElseThrow(() -> new UserException("El usuario con id " + userId + " no existe."));
 		userRepository.delete(usuario);
@@ -225,15 +334,6 @@ public class Controlador {
 
 	public User findUserByUsername(String username) {
 		return userRepository.findByUsername(username);
-	}
-
-	public AuthenticationResponse loginUsuario(LoginRequest request) {
-		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-		);
-		User user = userRepository.findByUsername(request.getUsername());
-		String jwtToken = jwtService.generateToken(user);
-		return AuthenticationResponse.builder().token(jwtToken).build();
 	}
 
 	//-----------------------------------------------Courses--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -342,6 +442,21 @@ public class Controlador {
 			throw new HeadquarterException(error.getMessage());
 		} catch (Exception error) {
 			throw new Exception("[Controlador.getCourseByName] -> " + error.getMessage());
+		}
+	}
+
+	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	public void seleccionarCursos(Long studentId, Course course){
+	
+		Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+		List<Course> cursosDisponibles = todosLosCursos();
+		
+		if(cursosDisponibles.contains(course)){
+			CourseAttended courseAttend = new CourseAttended(null, course.getCourseSchedule(), student);
+			
+			courseAttendRepository.save(courseAttend);
+		
 		}
 	}
 

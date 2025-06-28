@@ -23,8 +23,7 @@ public class CourseAttended {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private CourseSchedule courseSchedule;
-    @NotNull
-    @ManyToMany(mappedBy = "attendedCourses")
-    private List<Student> students;
+    
+    private Student student;
     
 }
