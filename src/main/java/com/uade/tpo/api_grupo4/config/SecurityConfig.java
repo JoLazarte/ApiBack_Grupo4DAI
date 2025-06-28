@@ -28,7 +28,9 @@ public class SecurityConfig {
                                 "/apiUser/loginUser",
                                 "/apiUser/registerUser",
                                 "/apiUser/check-alias",
-                                "/apiUser/check-email"
+                                "/apiUser/check-email",
+                                "/apiUser/iniciar-registro",
+                                "/apiUser/finalizar-registro"
                         ).permitAll()
 
                         // Para cualquier otra petición, se requerirá autenticación

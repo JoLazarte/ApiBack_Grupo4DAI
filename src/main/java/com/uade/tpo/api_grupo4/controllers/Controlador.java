@@ -20,12 +20,12 @@ import com.uade.tpo.api_grupo4.repository.CourseAttendRepository;
 import com.uade.tpo.api_grupo4.repository.CourseRepository;
 import com.uade.tpo.api_grupo4.repository.CourseScheduleRepository;
 import com.uade.tpo.api_grupo4.repository.HeadquarterRepository;
+import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
-import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
 import com.uade.tpo.api_grupo4.service.EmailService;
-import com.uade.tpo.api_grupo4.service.JwtService; // Asegúrate de importar tu JwtService
+import com.uade.tpo.api_grupo4.service.JwtService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,12 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 @Service
-@RequiredArgsConstructor 
+@RequiredArgsConstructor
 public class Controlador {
 
-	// Inyección de dependencias a través de campos 'final'
 	private final StudentRepository studentRepository;
 	private final UserRepository userRepository;
 	private final CourseRepository courseRepository;
@@ -50,8 +48,6 @@ public class Controlador {
 	private final HeadquarterRepository headquarterRepository;
 	private final CourseAttendRepository courseAttendRepository;
 	private final RecipeRepository recipeRepository;
-
-	//Inyectamos los servicios que necesitamos para el login JWT
 	private final JwtService jwtService;
 	private final AuthenticationManager authenticationManager;
 	private final PendingUserRepository pendingUserRepository;
@@ -96,7 +92,7 @@ public class Controlador {
 			userRepository.save(nuevoUsuario);
 			System.out.println("Usuario agregado con éxito: " + nuevoUsuario.getUsername());
 
-			} else {
+		} else {
 			Student nuevoEstudiante = Student.builder()
 					.username(request.getUsername())
 					.email(request.getEmail())
@@ -310,9 +306,6 @@ public class Controlador {
 				.dniDorso(student.getDniDorso())
 				.nroTramite(student.getNroTramite())
 				.cuentaCorriente(student.getCuentaCorriente())
-				.nroDocumento(student.getNroDocumento())
-				.tipoTarjeta(student.getTipoTarjeta())
-				// Los nuevos campos (nroDocumento, tipoTarjeta) si irian aquí, porque debe completarse el registro de estudiante por completo.
 				.build();
 
 		studentRepository.save(nuevoEstudiante);
