@@ -3,6 +3,7 @@ package com.uade.tpo.api_grupo4.entity;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.uade.tpo.api_grupo4.controllers.courses.CourseView;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -41,6 +42,20 @@ public class Course {
 
     public void assignCourseSched(CourseSchedule courseSchedule) {
         this.courseSchedule.setCourse(this);
+    }
+
+    public CourseView toView(){
+        return new CourseView(
+            this.id,
+            this.name,
+            this.content,
+            this.requirements,
+            this.length,
+            this.price,
+            this.mode,
+            this.courseSchedule,
+            this.students
+        );
     }
     
 }

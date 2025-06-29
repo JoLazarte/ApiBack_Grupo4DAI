@@ -5,10 +5,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,8 +21,10 @@ import com.uade.tpo.api_grupo4.controllers.Controlador;
 import com.uade.tpo.api_grupo4.entity.Course;
 
 import com.uade.tpo.api_grupo4.entity.ResponseData;
+import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
+import com.uade.tpo.api_grupo4.exceptions.UserException;
 
 @RestController
 @RequestMapping("/apiCourse")
@@ -42,7 +48,27 @@ public class ApiCourse {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
         }
     }
+    //Se puede crear un curso nuevo con un body por postman:
+    @PostMapping("")
+    public ResponseEntity<ResponseData<?>> createCourse(@RequestBody CourseView courseView) {
+        try {
+        courseView.setId(null);
 
+        Course course = courseView.toEntity();
+
+        Course createdCourse = controlador.createCourse(course);
+
+        CourseView createdCourseView = createdCourse.toView();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseData.success(createdCourseView));
+
+        } catch (Exception error) {
+        System.out.printf("[ApiCourse.createCourse] -> %s", error.getMessage() );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo crear el curso"));
+        }
+    }
+
+    //cursos ya creados en el controlador:
     @PostMapping("/initializeCourses")
     public ResponseEntity<ResponseData<String>> initializeCoursesDB() {
         try {
@@ -56,6 +82,39 @@ public class ApiCourse {
             System.out.printf("[ApiCourse.initializeCoursesDB] -> %s", error.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ResponseData.error("No se pudo inicializar la DB"));
+        }
+    }
+
+    @PutMapping("")
+    public ResponseEntity<ResponseData<?>> updateCourse(@RequestBody CourseView courseView) {
+        try {
+        Course course = courseView.toEntity();
+
+        Course updatedCourse = controlador.updateCourse(course);
+
+        CourseView updatedCourseView = updatedCourse.toView();
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(updatedCourseView));
+
+        }catch (CourseException error) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
+
+        } catch (Exception error) {
+        System.out.printf("[ApiCourse.updateCourse] -> %s", error.getMessage() );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo actualizar el curso"));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseData<?>> deleteCourse(@PathVariable Long id) {
+        try {
+        controlador.deleteCourse(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(null));
+
+        } catch (Exception error) {
+        System.out.printf("[ApiCourse.deleteCourse] -> %s", error.getMessage() );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo eliminar el producto"));
         }
     }
 
@@ -73,6 +132,25 @@ public class ApiCourse {
         System.out.printf("[ApiCourse.seleccionarCurso] -> %s", error.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ResponseData.error("No se pudo seleccionar el curso"));
+        }
+    }
+
+    @GetMapping("/studentCourses")
+    public ResponseEntity<ResponseData<?>> getStudentCourses(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+        Student authUser = controlador.findStudentByUsername(userDetails.getUsername());
+
+        List<CourseView> cursos = controlador.getStudentCourses(authUser.getId()).stream().map(Course::toView).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(cursos));
+
+        } catch (UserException error) {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(ResponseData.error(error.getMessage()));
+
+        } catch (Exception error) {
+        System.out.printf("[ApiCourse.getStudentCourses] -> %s", error.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(ResponseData.error("No se pudieron obtener los cursos."));
         }
     }
     

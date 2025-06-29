@@ -286,6 +286,7 @@ public class Controlador {
 		return student.getPassword().equals(loginRequest.getPassword());
 	}
 
+
 	//-----------------------------------------------Users--------------------------------------------------------------------------------------------------------------------------------------------------------
 	public List<User> todosLosUsuarios() throws UserException {
 		List<User> usuarios = userRepository.findAll();
@@ -521,6 +522,18 @@ public class Controlador {
 		}
 	}
 
+	public Course createCourse(Course course) throws Exception {
+          try {
+            Course createdCourse = new Course(null, course.getName(), course.getContent(), course.getRequirements(), 
+				course.getLength(), course.getPrice(), course.getMode(), new CourseSchedule(), new ArrayList<>() );
+			
+			courseRepository.save(createdCourse);
+            return createdCourse;
+          } catch (Exception error) {
+            throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
+          }
+        }
+
 	public void inicializarCursos() throws Exception {
 		try{	
 
@@ -539,9 +552,9 @@ public class Controlador {
             Course course3 = new Course(null, "Reposteria Cacera", "Desde tu hogar, aprenderás a conocer y a elegir los ingredientes, como también la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, courseSchedule3, new ArrayList<>());
             course1.assignCourseSched(courseSchedule3);
 
-            courseRepository.save(course1); 
-			courseRepository.save(cours2);
-			courseRepository.save(course3);
+            createCourse(course1); 
+			createCourse(cours2);
+			createCourse(course3);
 
 		 } catch (CourseException error) {
 
@@ -550,6 +563,29 @@ public class Controlador {
 				throw new Exception("[Controlador.inicializarCursos] -> " + error.getMessage());
 			}
     	}
+
+	public Course updateCourse(Course course) throws Exception {
+          try {
+            if (!courseRepository.existsById(course.getId())) 
+              throw new CourseException("El curso con id: '" + course.getId() + "' no existe.");
+            
+            Course updatedCourse = courseRepository.save(course);
+            return updatedCourse;
+          } catch (CourseException error) {
+            throw new CourseException(error.getMessage());
+          } catch (Exception error) {
+            throw new Exception("[Controlador.updateCourse] -> " + error.getMessage());
+          }
+    }
+
+	@Transactional
+    public void deleteCourse(Long id) throws Exception {
+          try {
+              courseRepository.deleteById(id);
+          } catch (Exception error) {
+            throw new Exception("[Controlador.deleteCourse] -> " + error.getMessage());
+          }
+    }
 
 	public void seleccionarCursos(Long studentId, Long courseId){
 		//verifico que existan tanto el estudiante como el curso seleccionado:
@@ -581,6 +617,14 @@ public class Controlador {
 		
 	}
 
+	public List<Course> getStudentCourses(Long studentId) throws Exception {
+		try{
+		return courseRepository.findByStudentId(studentId);
+		}catch(Exception error) {
+		throw new Exception("[Controlador.getUserCourses] -> " + error.getMessage());
+		}
+	}
+
 
 	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
@@ -602,6 +646,36 @@ public class Controlador {
 				})
 				.orElseThrow(()-> new CourseScheduleException("No existe el cronograma con el id" + courseScheduleAsociado.getId()));
 	}
+
+	public CourseSchedule updateCourseSchedule(CourseSchedule courseSched) throws Exception {
+          try {
+            if (!courseSchedRepository.existsById(courseSched.getId())) 
+              throw new CourseException("El cronograma con id: '" + courseSched.getId() + "' no existe.");
+            
+            CourseSchedule updatedCourseSched = courseSchedRepository.save(courseSched);
+            return updatedCourseSched;
+          } catch (CourseException error) {
+            throw new CourseException(error.getMessage());
+          } catch (Exception error) {
+            throw new Exception("[Controlador.updateCourseSchedule] -> " + error.getMessage());
+          }
+    }
+
+	@Transactional
+    public void deleteCourseSchedule(Long id) throws Exception {
+          try {
+              
+			  CourseSchedule courseShed = courseSchedRepository.findById(id).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + id + " no existe."));
+			  //Vacio el cronograma para el curso asociado
+			  Course course = courseShed.getCourse();
+			  course.setCourseSchedule(new CourseSchedule());
+			  courseSchedRepository.deleteById(id);
+			  courseRepository.save(course);
+          } catch (Exception error) {
+            throw new Exception("[Controlador.deleteCourseSchedule] -> " + error.getMessage());
+          }
+        }
+
 
 	//-----------------------------------------------Headquarters--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -631,6 +705,7 @@ public class Controlador {
 			}
     	}
 
+	
 	public Headquarter getHeadquarterByName(String name) throws Exception {
 		try{
 			return headquarterRepository.findByName(name).orElseThrow(() -> new HeadquarterException("Sede no encontrada"));
@@ -640,6 +715,30 @@ public class Controlador {
 			throw new Exception("[Controlador.getCourseByName] -> " + error.getMessage());
 		}
 	}
+
+
+	public Headquarter updateSede(Headquarter headquarter) throws Exception {
+          try {
+            if (!headquarterRepository.existsById(headquarter.getId())) 
+              throw new HeadquarterException("La sede con id: '" + headquarter.getId() + "' no existe.");
+            
+            Headquarter updatedHeadquarter = headquarterRepository.save(headquarter);
+            return updatedHeadquarter;
+          } catch (CourseException error) {
+            throw new CourseException(error.getMessage());
+          } catch (Exception error) {
+            throw new Exception("[Controlador.updateSede] -> " + error.getMessage());
+          }
+    }
+
+	@Transactional
+    public void deleteSede(Long id) throws Exception {
+          try {
+              headquarterRepository.deleteById(id);
+          } catch (Exception error) {
+            throw new Exception("[Controlador.deleteSede] -> " + error.getMessage());
+          }
+    }
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
