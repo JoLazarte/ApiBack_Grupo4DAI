@@ -23,7 +23,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Student extends Person implements UserDetails {
+public class Student extends Person{
 
     @ManyToMany
     @JoinTable(

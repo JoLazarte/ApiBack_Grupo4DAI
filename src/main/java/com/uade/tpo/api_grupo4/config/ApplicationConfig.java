@@ -1,7 +1,6 @@
-// Archivo: src/main/java/com/uade/tpo/api_grupo4/config/ApplicationConfig.java
-
 package com.uade.tpo.api_grupo4.config;
 
+import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -20,34 +20,42 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationConfig {
 
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository; // Inyectamos también el de Student
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Le decimos a Spring Security que para buscar un usuario por su 'username',
-        // debe usar el método findByUsername de nuestro UserRepository.
-        return username -> userRepository.findByUsername(username);
+        // ▼▼▼ LÓGICA CORREGIDA ▼▼▼
+        return username -> {
+            // Buscamos primero como User
+            UserDetails user = userRepository.findByUsername(username);
+            if (user != null) {
+                return user;
+            }
+            // Si no es User, buscamos como Student
+            user = studentRepository.findByUsername(username);
+            if (user != null) {
+                return user;
+            }
+            // Si no se encuentra en ninguno de los dos, lanzamos la excepción.
+            throw new UsernameNotFoundException("Usuario no encontrado: " + username);
+        };
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        // Este es el "proveedor de datos" que usará Spring Security.
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService());
-        // Aquí le indicamos el "comparador" de contraseñas.
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // ⚠️ ¡Inseguro! Le decimos a Spring que no espere contraseñas cifradas.
-        // Las tratará como texto plano. Solo para este proyecto.
         return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        // Exponemos el AuthenticationManager de Spring para poder usarlo en nuestro Controlador.
         return config.getAuthenticationManager();
     }
 }

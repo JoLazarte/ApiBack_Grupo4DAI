@@ -1,53 +1,51 @@
 package com.uade.tpo.api_grupo4.entity;
-import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*; // Importante
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Collection;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@MappedSuperclass
-public abstract class Person {
+@Entity // <-- CAMBIO 1: Ahora es una entidad real
+@Inheritance(strategy = InheritanceType.JOINED) // <-- CAMBIO 2: Estrategia de herencia
+public abstract class Person implements UserDetails { // <-- CAMBIO 3: Implementa UserDetails aquí
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     protected String username;
+    // ... resto de tus campos de Person ...
     protected String firstName;
     protected String lastName;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     protected String email;
     protected String password;
     @Column(unique = true)
     protected String phone;
     @Column(unique = true)
     protected String address;
-    //@NotEmpty
     @Column(columnDefinition = "LONGTEXT")
     protected String urlAvatar;
     protected Boolean permissionGranted;
 
-    public PersonView toView() {
-		return new PersonView(
-            this.id, 
-            this.username, 
-            this.firstName, 
-            this.lastName, 
-            this.email, 
-            this.password, 
-            this.phone, 
-            this.address, 
-            this.urlAvatar, 
-            this.permissionGranted);
-	}
+    // --- Métodos de UserDetails (los movemos aquí) ---
+    // La implementación concreta la darán las clases hijas
+    @Override
+    public abstract Collection<? extends GrantedAuthority> getAuthorities();
 
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+    @Override
+    public boolean isEnabled() { return true; }
 }

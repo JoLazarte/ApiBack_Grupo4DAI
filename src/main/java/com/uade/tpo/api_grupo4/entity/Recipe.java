@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,20 +34,21 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "user_id")
     @JsonBackReference
-    private User user;
+    private Person user;
     private String recipeName;
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Step> description;	
-    @ManyToMany
-    @JoinTable(
-    name = "materialUsed_recipe", 
-    joinColumns = @JoinColumn(name = "recipe_id"), 
-    inverseJoinColumns = @JoinColumn(name = "materialUsed_id"))
-    private List<MaterialUsed> ingredients;  
+    @OneToMany(
+    mappedBy = "recipe",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true
+    )
+    @JsonManagedReference("recipe-materials")
+    private List<MaterialUsed> ingredients;
     @Column(columnDefinition = "LONGTEXT")
     private String mainPicture;
     private int servings;	

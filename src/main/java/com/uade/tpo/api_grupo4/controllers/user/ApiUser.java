@@ -17,10 +17,7 @@ import com.uade.tpo.api_grupo4.exceptions.StudentException;
 import com.uade.tpo.api_grupo4.exceptions.UserException;
 import com.uade.tpo.api_grupo4.controllers.person.VerificationRequest;
 
-
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
-
-
 
 @RestController
 @RequestMapping("/apiUser")

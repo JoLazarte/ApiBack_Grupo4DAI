@@ -3,13 +3,25 @@ package com.uade.tpo.api_grupo4.controllers;
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
+import com.uade.tpo.api_grupo4.controllers.recipe.CreateRecipeRequest;
+import com.uade.tpo.api_grupo4.controllers.recipe.CreateTypeRequest;
+import com.uade.tpo.api_grupo4.controllers.recipe.CreateUnitRequest;
+import com.uade.tpo.api_grupo4.controllers.recipe.MaterialRequestDTO;
+import com.uade.tpo.api_grupo4.controllers.recipe.StepRequestDTO;
 import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseAttended;
 import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
+import com.uade.tpo.api_grupo4.entity.Ingredient;
+import com.uade.tpo.api_grupo4.entity.MaterialUsed;
 import com.uade.tpo.api_grupo4.entity.PendingUser;
+import com.uade.tpo.api_grupo4.entity.Person;
+import com.uade.tpo.api_grupo4.entity.Recipe;
+import com.uade.tpo.api_grupo4.entity.Step;
 import com.uade.tpo.api_grupo4.entity.Student;
+import com.uade.tpo.api_grupo4.entity.TypeOfRecipe;
+import com.uade.tpo.api_grupo4.entity.Unit;
 import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
@@ -20,13 +32,19 @@ import com.uade.tpo.api_grupo4.repository.CourseAttendRepository;
 import com.uade.tpo.api_grupo4.repository.CourseRepository;
 import com.uade.tpo.api_grupo4.repository.CourseScheduleRepository;
 import com.uade.tpo.api_grupo4.repository.HeadquarterRepository;
+import com.uade.tpo.api_grupo4.repository.IngredientRepository;
+import com.uade.tpo.api_grupo4.repository.MaterialUsedRepository;
 import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
+import com.uade.tpo.api_grupo4.repository.StepRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
+import com.uade.tpo.api_grupo4.repository.TypeOfRecipeRepository;
+import com.uade.tpo.api_grupo4.repository.UnitRepository;
 import com.uade.tpo.api_grupo4.repository.UserRepository;
 import com.uade.tpo.api_grupo4.service.EmailService;
 import com.uade.tpo.api_grupo4.service.JwtService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +54,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -49,6 +68,11 @@ public class Controlador {
 	private final HeadquarterRepository headquarterRepository;
 	private final CourseAttendRepository courseAttendRepository;
 	private final RecipeRepository recipeRepository;
+	private final UnitRepository unitRepository;
+	private final MaterialUsedRepository materialUsedRepository;
+	private final IngredientRepository ingredientRepository;
+	private final TypeOfRecipeRepository typeOfRecipeRepository;
+	private final StepRepository stepRepository;
 	private final JwtService jwtService;
 	private final AuthenticationManager authenticationManager;
 	private final PendingUserRepository pendingUserRepository;
@@ -65,6 +89,29 @@ public class Controlador {
 
 	//-----------------------------------------------Registro y Login--------------------------------------------------------------------------------------------------------------------------------------------------------
 
+	//--------Login--------
+	public AuthenticationResponse loginUsuario(LoginRequest request) throws Exception {
+
+		User user = userRepository.findByUsername(request.getUsername());
+
+		if (user != null) {
+			if (user.getPassword().equals(request.getPassword())) {
+				String jwtToken = jwtService.generateToken(user);
+				return AuthenticationResponse.builder().token(jwtToken).build();
+			}
+		} else {
+			Student student = studentRepository.findByUsername(request.getUsername());
+
+			if (student != null) {
+				if (student.getPassword().equals(request.getPassword())) {
+					String jwtToken = jwtService.generateToken(student);
+					return AuthenticationResponse.builder().token(jwtToken).build();
+				}
+			}
+		}
+
+		throw new Exception("Credenciales incorrectas");
+	}
 
 	//--------Registro--------
 	public void crearUsuarioGeneral(RegisterRequest request) throws UserException {
@@ -74,6 +121,7 @@ public class Controlador {
 		if (userRepository.existsByEmail(request.getEmail()) || studentRepository.existsByEmail(request.getEmail())) {
 			throw new UserException("El correo electrónico '" + request.getEmail() + "' ya está registrado.");
 		}
+
 		if (request.getPermissionGranted() == true) {
 			User nuevoUsuario = User.builder()
 					.username(request.getUsername())
@@ -119,34 +167,8 @@ public class Controlador {
 		}
 	}
 
-	//--------Login--------
-	public AuthenticationResponse loginUsuario(LoginRequest request) throws Exception {
-
-		User user = userRepository.findByUsername(request.getUsername());
-
-		if (user != null) {
-			if (user.getPassword().equals(request.getPassword())) {
-				String jwtToken = jwtService.generateToken(user);
-				return AuthenticationResponse.builder().token(jwtToken).build();
-			}
-		} else {
-			Student student = studentRepository.findByUsername(request.getUsername());
-
-			if (student != null) {
-				if (student.getPassword().equals(request.getPassword())) {
-					String jwtToken = jwtService.generateToken(student);
-					return AuthenticationResponse.builder().token(jwtToken).build();
-				}
-			}
-		}
-
-		throw new Exception("Credenciales incorrectas");
-	}
-
 	//--------Iniciar Registro--------
-
 	public void iniciarRegistro(RegisterRequest request) throws UserException {
-		// Las validaciones de alias y email existentes se mantienen
 		if (aliasExists(request.getUsername())) {
 			throw new UserException("El nombre de usuario '" + request.getUsername() + "' ya está en uso.");
 		}
@@ -154,10 +176,8 @@ public class Controlador {
 			throw new UserException("El correo electrónico '" + request.getEmail() + "' ya está registrado.");
 		}
 
-		// 1. Generamos un código aleatorio de 4 dígitos
 		String code = String.format("%04d", new Random().nextInt(10000));
 
-		// 2. Creamos el objeto de usuario pendiente con todos los datos
 		PendingUser pendingUser = PendingUser.builder()
 				.username(request.getUsername()).email(request.getEmail()).password(request.getPassword())
 				.firstName(request.getFirstName()).lastName(request.getLastName()).phone(request.getPhone())
@@ -167,36 +187,28 @@ public class Controlador {
 				.nroDocumento(request.getNroDocumento()).tipoTarjeta(request.getTipoTarjeta())
 				.dniFrente(request.getDniFrente()).dniDorso(request.getDniDorso())
 				.verificationCode(code)
-				.expiryDate(LocalDateTime.now().plusMinutes(15)) // El código expira en 15 minutos
+				.expiryDate(LocalDateTime.now().plusMinutes(15))
 				.build();
 
-		// 3. Guardamos el registro pendiente en la nueva tabla
 		pendingUserRepository.save(pendingUser);
 
-		// 4. Enviamos el correo
 		emailService.sendVerificationCode(pendingUser.getEmail(), code);
 	}
 
 	//--------Finalizar Registro--------
-	// (Necesitaremos un nuevo DTO para la petición, por ahora usamos los parámetros directamente)
 	public void finalizarRegistro(String email, String code) throws UserException {
-		// 1. Buscamos el registro pendiente
 		PendingUser pendingUser = pendingUserRepository.findById(email)
 				.orElseThrow(() -> new UserException("No se encontró un registro pendiente para este email. Puede que haya expirado."));
 
-		// 2. Verificamos si el código ha expirado
 		if (pendingUser.getExpiryDate().isBefore(LocalDateTime.now())) {
-			pendingUserRepository.delete(pendingUser); // Lo borramos si expiró
+			pendingUserRepository.delete(pendingUser);
 			throw new UserException("El código de verificación ha expirado. Por favor, intenta registrarte de nuevo.");
 		}
 
-		// 3. Verificamos si el código es correcto
 		if (!pendingUser.getVerificationCode().equals(code)) {
 			throw new UserException("El código de verificación es incorrecto.");
 		}
 
-		// 4. --- ESTE ES EL ARREGLO ---
-		// Creamos el objeto final y copiamos TODOS los datos desde el usuario pendiente
 		RegisterRequest finalRequest = new RegisterRequest();
 		finalRequest.setUsername(pendingUser.getUsername());
 		finalRequest.setEmail(pendingUser.getEmail());
@@ -214,10 +226,8 @@ public class Controlador {
 		finalRequest.setNroDocumento(pendingUser.getNroDocumento());
 		finalRequest.setTipoTarjeta(pendingUser.getTipoTarjeta());
 
-		// 5. Llamamos a nuestro método de creación original con el objeto ya completo
 		crearUsuarioGeneral(finalRequest);
 
-		// 6. Si todo fue bien, borramos el registro pendiente para que no se pueda volver a usar
 		pendingUserRepository.delete(pendingUser);
 	}
 
@@ -295,7 +305,6 @@ public class Controlador {
 		User usuarioACambiar = userRepository.findById(id)
 				.orElseThrow(() -> new UserException("No existe el usuario con el id " + id));
 
-		// Usamos el Builder para que el código sea más claro y no dependa del orden del constructor
 		Student nuevoEstudiante = Student.builder()
 				.username(usuarioACambiar.getUsername())
 				.email(usuarioACambiar.getEmail())
@@ -332,6 +341,166 @@ public class Controlador {
 		return userRepository.findByUsername(username);
 	}
 
+	//-----------------------------------------------Recetas--------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	//--------Ingredientes--------
+    public Ingredient createIngredient(Ingredient ingredientData) {
+        String normalizedName = ingredientData.getName().trim().toLowerCase();
+
+        Optional<Ingredient> existingIngredient = ingredientRepository.findByName(normalizedName);
+
+        if (existingIngredient.isPresent()) {
+            throw new IllegalStateException("El ingrediente '" + normalizedName + "' ya existe.");
+        } else {
+            Ingredient newIngredient = new Ingredient();
+            newIngredient.setName(normalizedName);
+            return ingredientRepository.save(newIngredient);
+        }
+    }
+
+	//--------Materiales usados--------
+	public MaterialUsed addMaterialToRecipe(Long recipeId, MaterialRequestDTO materialRequest) throws Exception {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new Exception("No se encontró la receta con ID: " + recipeId));
+
+        Ingredient ingredient = ingredientRepository.findById(materialRequest.getIngredientId())
+                .orElseThrow(() -> new Exception("No se encontró el ingrediente con ID: " + materialRequest.getIngredientId()));
+
+        Unit unit = null;
+        if (materialRequest.getUnitId() != null) {
+            unit = unitRepository.findById(materialRequest.getUnitId())
+                    .orElseThrow(() -> new Exception("No se encontró la unidad con ID: " + materialRequest.getUnitId()));
+        }
+
+        MaterialUsed newMaterial = MaterialUsed.builder()
+                .recipe(recipe)
+                .ingredient(ingredient)
+                .quantity(materialRequest.getQuantity())
+                .unity(unit)
+                .observation(materialRequest.getObservation())
+                .build();
+        
+        return materialUsedRepository.save(newMaterial);
+    }
+
+	//--------Crear Tipo de receta--------
+	public TypeOfRecipe createTypeOfRecipe(CreateTypeRequest request) throws Exception {
+		// Normalizamos el nombre para evitar espacios extra
+		String typeName = request.getName().trim();
+
+		// Verificamos si ya existe usando el método que creamos en el repositorio
+		if (typeOfRecipeRepository.findByNameIgnoreCase(typeName).isPresent()) {
+			throw new Exception("El tipo de receta '" + typeName + "' ya existe.");
+		}
+
+		// Si no existe, creamos el nuevo objeto
+		TypeOfRecipe newType = TypeOfRecipe.builder()
+				.name(typeName)
+				.build();
+
+		// Guardamos y devolvemos el nuevo tipo
+		return typeOfRecipeRepository.save(newType);
+	}
+
+	//--------Crear Tipo de unidad--------
+	public Unit createUnit(CreateUnitRequest request) throws Exception {
+		String unitDescription = request.getDescription().trim();
+
+		// Verificamos si ya existe para evitar duplicados
+		if (unitRepository.findByDescriptionIgnoreCase(unitDescription).isPresent()) {
+			throw new Exception("La unidad '" + unitDescription + "' ya existe.");
+		}
+
+		Unit newUnit = Unit.builder()
+				.description(unitDescription)
+				.build();
+
+		return unitRepository.save(newUnit);
+	}
+
+	//--------Crear receta--------
+	@Transactional
+	public Recipe createRecipeWithMaterials(CreateRecipeRequest request, Person author) throws Exception {
+		
+		// 1. Buscamos las entidades relacionadas que son obligatorias, como el tipo de receta.
+		TypeOfRecipe typeOfRecipe = typeOfRecipeRepository.findById(request.getTypeOfRecipeId())
+				.orElseThrow(() -> new Exception("Tipo de receta no encontrado con ID: " + request.getTypeOfRecipeId()));
+
+		// 2. Creamos el objeto principal de la Receta con sus datos básicos.
+		Recipe newRecipe = Recipe.builder()
+				.recipeName(request.getRecipeName())
+				.user(author) // Se asocia al usuario autenticado que la crea
+				.mainPicture(request.getMainPicture())
+				.servings(request.getServings())
+				.comensales(request.getCantidadPersonas())
+				.typeOfRecipe(typeOfRecipe)
+				.ingredients(new ArrayList<>()) // Inicializamos las listas para evitar errores
+				.description(new ArrayList<>())
+				.reviews(new ArrayList<>())
+				.build();
+
+		// 3. Procesamos la lista de Materiales (Ingredientes)
+		if (request.getIngredients() != null) {
+			for (MaterialRequestDTO materialDto : request.getIngredients()) {
+				
+				Ingredient ingredientToUse;
+
+				// Lógica de Prioridades para Ingredientes:
+				// Prioridad 1: Usar el ID del ingrediente si se proporciona.
+				if (materialDto.getIngredientId() != null) {
+					ingredientToUse = ingredientRepository.findById(materialDto.getIngredientId())
+							.orElseThrow(() -> new Exception("Ingrediente no encontrado con el ID proporcionado: " + materialDto.getIngredientId()));
+				
+				// Prioridad 2: Si no hay ID, usar el nombre del ingrediente (Buscar o Crear).
+				} else if (materialDto.getIngredientName() != null && !materialDto.getIngredientName().trim().isEmpty()) {
+					String ingredientName = materialDto.getIngredientName().trim().toLowerCase();
+					
+					ingredientToUse = ingredientRepository.findByName(ingredientName)
+							.orElseGet(() -> {
+								Ingredient newIngredient = Ingredient.builder().name(ingredientName).build();
+								return ingredientRepository.save(newIngredient);
+							});
+
+				// Error: Si no se proporciona ni ID ni nombre.
+				} else {
+					throw new Exception("Se debe proporcionar 'ingredientId' o 'ingredientName' para cada material.");
+				}
+
+				// Buscamos la unidad (es opcional)
+				Unit unit = materialDto.getUnitId() != null ? unitRepository.findById(materialDto.getUnitId())
+						.orElseThrow(() -> new Exception("Unidad no encontrada con ID: " + materialDto.getUnitId())) : null;
+
+				// Creamos el objeto MaterialUsed y lo añadimos a la lista de la receta
+				MaterialUsed material = MaterialUsed.builder()
+						.recipe(newRecipe)
+						.ingredient(ingredientToUse)
+						.unity(unit)
+						.quantity(materialDto.getQuantity())
+						.observation(materialDto.getObservation())
+						.build();
+				newRecipe.getIngredients().add(material);
+			}
+		}
+		
+		// 4. Procesamos la lista de Pasos
+		if (request.getSteps() != null) {
+			for (StepRequestDTO stepDto : request.getSteps()) {
+				Step step = Step.builder()
+						.recipe(newRecipe)
+						.numberOfStep(stepDto.getNumberOfStep())
+						.comment(stepDto.getComment())
+						.imagenPaso(stepDto.getImagenPaso())
+						.videoPaso(stepDto.getVideoPaso())
+						.build();
+				newRecipe.getDescription().add(step);
+			}
+		}
+
+		// 5. Guardamos la Receta principal en la base de datos.
+		// Gracias a la configuración de 'cascade', JPA guardará automáticamente todos los
+		// objetos MaterialUsed y Step que asociamos a esta receta.
+		return recipeRepository.save(newRecipe);
+	}
 	//-----------------------------------------------Courses--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	public List<Course> todosLosCursos() throws CourseException {
