@@ -24,19 +24,5 @@ public class ApiCourseAttend {
         this.controlador = controlador;
     }
 
-    @PostMapping("/asistencia/{studentId}")
-    public ResponseEntity<ResponseData<String>> tomarAsistencia(@PathVariable Long studentId) {
-        try {
-
-            controlador.tomarAsistencia(studentId);
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("Asistencia correctamente!"));
-
-        } catch (CourseAttendException error) {
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.error(error.getMessage()));
-        } catch (Exception error) {
-            System.out.printf("[ApiCourseAttend.tomarAsistencia] -> %s", error.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ResponseData.error("No se pudo tomar asistencia"));
-        }
-    }
+    
 }

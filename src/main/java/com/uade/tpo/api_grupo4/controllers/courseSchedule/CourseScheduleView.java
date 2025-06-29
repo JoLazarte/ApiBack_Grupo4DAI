@@ -1,16 +1,12 @@
 package com.uade.tpo.api_grupo4.controllers.courseSchedule;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+
 
 import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
-import com.uade.tpo.api_grupo4.entity.EnumDiaSemana;
-import com.uade.tpo.api_grupo4.entity.Headquarter;
 
-import jakarta.persistence.Column;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

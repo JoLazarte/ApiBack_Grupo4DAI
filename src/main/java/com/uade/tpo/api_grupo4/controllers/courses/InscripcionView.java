@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseAttended;
+import com.uade.tpo.api_grupo4.entity.Inscripcion;
 import com.uade.tpo.api_grupo4.entity.Student;
 
 import lombok.AllArgsConstructor;
@@ -32,7 +33,7 @@ public class InscripcionView {
             this.course,
             this.fechaInscripcion,
             this.estado,
-            this.asistencias,
+            this.asistencias
             
         );
     }

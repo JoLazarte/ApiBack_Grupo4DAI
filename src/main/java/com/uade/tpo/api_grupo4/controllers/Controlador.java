@@ -532,9 +532,7 @@ public class Controlador {
 
 	public Course createCourse(Course course) throws Exception {
           try {
-            Course createdCourse = new Course( );
-			
-			courseRepository.save(createdCourse);
+			Course createdCourse = courseRepository.save(course);
             return createdCourse;
           } catch (Exception error) {
             throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
@@ -551,9 +549,9 @@ public class Controlador {
             Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer y a elegir los ingredientes, la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
            
 
-            createCourse(course1); 
-			createCourse(cours2);
-			createCourse(course3);
+            courseRepository.save(course1); 
+			courseRepository.save(cours2);
+			courseRepository.save(course3);
 
 		 } catch (CourseException error) {
 

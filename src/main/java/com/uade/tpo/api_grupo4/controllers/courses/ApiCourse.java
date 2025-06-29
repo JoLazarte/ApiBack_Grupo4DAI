@@ -22,7 +22,6 @@ import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.ResponseData;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
-import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 
 
 @RestController
@@ -131,28 +130,6 @@ public class ApiCourse {
             return ResponseEntity.ok(courses);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-    
-    
-
-
-
-
-    @PutMapping("{studentId}/{courseId}")
-    public ResponseEntity<ResponseData<?>> seleccionarCurso(@PathVariable Long studentId, @PathVariable Long courseId) {
-        try {
-            
-            controlador.seleccionarCursos(studentId, courseId);
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("Curso seleccionado con exito"));
-
-            } catch (CourseException | CourseScheduleException error) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
-
-        } catch (Exception error) {
-        System.out.printf("[ApiCourse.seleccionarCurso] -> %s", error.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ResponseData.error("No se pudo seleccionar el curso"));
         }
     }
 
