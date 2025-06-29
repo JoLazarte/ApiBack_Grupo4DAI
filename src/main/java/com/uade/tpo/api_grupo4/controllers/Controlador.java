@@ -1,5 +1,9 @@
 package com.uade.tpo.api_grupo4.controllers;
 
+import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
+import com.uade.tpo.api_grupo4.controllers.courses.CourseView;
+import com.uade.tpo.api_grupo4.controllers.courses.InscripcionView;
+import com.uade.tpo.api_grupo4.controllers.headquarter.HeadquarterView;
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
@@ -14,6 +18,7 @@ import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
 import com.uade.tpo.api_grupo4.entity.Ingredient;
+import com.uade.tpo.api_grupo4.entity.Inscripcion;
 import com.uade.tpo.api_grupo4.entity.MaterialUsed;
 import com.uade.tpo.api_grupo4.entity.PendingUser;
 import com.uade.tpo.api_grupo4.entity.Person;
@@ -33,6 +38,7 @@ import com.uade.tpo.api_grupo4.repository.CourseRepository;
 import com.uade.tpo.api_grupo4.repository.CourseScheduleRepository;
 import com.uade.tpo.api_grupo4.repository.HeadquarterRepository;
 import com.uade.tpo.api_grupo4.repository.IngredientRepository;
+import com.uade.tpo.api_grupo4.repository.InscripcionRepository;
 import com.uade.tpo.api_grupo4.repository.MaterialUsedRepository;
 import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
@@ -56,6 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +74,7 @@ public class Controlador {
 	private final CourseScheduleRepository courseSchedRepository;
 	private final HeadquarterRepository headquarterRepository;
 	private final CourseAttendRepository courseAttendRepository;
+	private final InscripcionRepository inscripcionRepository;
 	private final RecipeRepository recipeRepository;
 	private final UnitRepository unitRepository;
 	private final MaterialUsedRepository materialUsedRepository;
@@ -512,9 +520,9 @@ public class Controlador {
 			return cursos;
 	}
 
-	public Course getCourseByName(String name) throws Exception {
+	public Course getCourseById(Long courseId) throws Exception {
 		try{
-			return courseRepository.findByName(name).orElseThrow(() -> new CourseException("Curso no encontrado"));
+			return courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
 		} catch (CourseException error) {
 			throw new CourseException(error.getMessage());
 		} catch (Exception error) {
@@ -524,8 +532,7 @@ public class Controlador {
 
 	public Course createCourse(Course course) throws Exception {
           try {
-            Course createdCourse = new Course(null, course.getName(), course.getContent(), course.getRequirements(), 
-				course.getLength(), course.getPrice(), course.getMode(), new CourseSchedule(), new ArrayList<>() );
+            Course createdCourse = new Course( );
 			
 			courseRepository.save(createdCourse);
             return createdCourse;
@@ -537,20 +544,12 @@ public class Controlador {
 	public void inicializarCursos() throws Exception {
 		try{	
 
-        	CourseSchedule courseSchedule1 = new CourseSchedule();
-			courseSchedRepository.save(courseSchedule1);
-            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. Descubrí alimentos esenciales en la cocina vegana, como legumbres, frutos secos, semillas, verduras, frutas y granos integrales. Experimenta con diferentes sustituciones de ingredientes para adaptar tus recetas favoritas al estilo vegano.", "No necesitas conocimientos previos.", 120, 600.0, CourseMode.MIXTO, courseSchedule1, new ArrayList<>());
-            course1.assignCourseSched(courseSchedule1);
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. ", "No necesitas conocimientos previos.", 120, 600.0, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
 
-            CourseSchedule courseSchedule2 = new CourseSchedule();
-			courseSchedRepository.save(courseSchedule2);
-            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas: Saltear, freír, cocinar al vapor y estofar. Explorá ingredientes clave: Arroz, fideos, soja, diferentes tipos de verduras y especias. Investiga sobre sus usos y combinaciones para enriquecer tus preparaciones. Experimentá con diferentes regiones: Explora platos de China, Japón, Tailandia, Vietnam y otros países ", "Conocimientos básicos de cocina.", 180, 800.0, CourseMode.PRESENCIAL, courseSchedule2, new ArrayList<>());
-            course1.assignCourseSched(courseSchedule2);
-
-            CourseSchedule courseSchedule3 = new CourseSchedule();
-			courseSchedRepository.save(courseSchedule3);
-            Course course3 = new Course(null, "Reposteria Cacera", "Desde tu hogar, aprenderás a conocer y a elegir los ingredientes, como también la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, courseSchedule3, new ArrayList<>());
-            course1.assignCourseSched(courseSchedule3);
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave: Arroz, fideos, soja, diferentes tipos de verduras y especias.", "Conocimientos básicos de cocina.", 180, 800.0, CourseMode.PRESENCIAL, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+         
+            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer y a elegir los ingredientes, la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+           
 
             createCourse(course1); 
 			createCourse(cours2);
@@ -587,46 +586,87 @@ public class Controlador {
           }
     }
 
-	public void seleccionarCursos(Long studentId, Long courseId){
-		//verifico que existan tanto el estudiante como el curso seleccionado:
-		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("El curso con id " + courseId + " no existe."));
-		Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
-		
-		//definino listas nuevas por si el estudiante y/o el cuerso no tienen guardados cursos/estudiantes
-		List<Course> cursosATomar = new ArrayList<>();
-		List<Student> estudiantesConCursos = new ArrayList<>();
-		
-		List<Course> existeListaCursos = student.getCourses(); //el estudiante ya tiene una lista de cursos en la BD?
-		if( existeListaCursos.isEmpty()){
-			cursosATomar.add(course);
-			student.setCourses(cursosATomar);
-		} else {
-			existeListaCursos.add(course);
-		}
 
-		List<Student> existeListaEstudiantes = course.getStudents();// el curso ya fue seleccionado por algun estudiante?
-		if(existeListaEstudiantes.isEmpty()){
-			estudiantesConCursos.add(student);
-			course.setStudents(estudiantesConCursos);
-		} else {
-			existeListaEstudiantes.add(student);
-		}
-		
-		studentRepository.save(student);
-		courseRepository.save(course);
-		
-	}
+	public List<CourseView> findByHeadquarter(Long sedeId) {
+        return courseRepository.findBySedeId(sedeId)
+                .stream()
+                .map(Course::toView)
+                .collect(Collectors.toList());
+    }
+    
+    public List<CourseView> findByMode(CourseMode mode) {
+        return courseRepository.findByMode(mode)
+                .stream()
+                .map(Course::toView)
+                .collect(Collectors.toList());
+    }
+    
+    public List<CourseView> findByName(String name) {
+        return courseRepository.findByNameContainingIgnoreCase(name)
+                .stream()
+                .map(Course::toView)
+                .collect(Collectors.toList());
+    }
 
-	public List<Course> getStudentCourses(Long studentId) throws Exception {
-       try{
-           Student student = studentRepository.findById(studentId)
-               .orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
-           return student.getCourses();
+	//----------------------------------Inscripciones----------------------------------------------------------//
+	@Transactional
+    public InscripcionView enrollStudent(Long studentId, Long courseId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+        
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+        
+        // Verificar que el estudiante no esté ya inscripto en el curso
+        Optional<Inscripcion> existingInscription = inscripcionRepository
+                .findByEstudianteAndCourse(student, course);
+        
+        if (existingInscription.isPresent() && 
+            "ACTIVA".equals(existingInscription.get().getEstado())) {
+            throw new IllegalArgumentException("El estudiante ya está inscripto en este curso");
+        }
+        
+        // Verificar disponibilidad de cupos
+        Long activeEnrollments = inscripcionRepository.countActiveByCourse(courseId);
+        // Aquí podrías agregar lógica para verificar cupos disponibles basado en cronogramas
+        
+        Inscripcion inscripcion = Inscripcion.builder()
+                .estudiante(student)
+                .course(course)
+                .fechaInscripcion(LocalDateTime.now())
+                .estado("ACTIVA")
+                .build();
+        
+        Inscripcion savedInscripcion = inscripcionRepository.save(inscripcion);
+        return mapToView(savedInscripcion);
+    }
+    
+    @Transactional
+    public Optional<InscripcionView> cancelEnrollment(Long inscripcionId) {
+        return inscripcionRepository.findById(inscripcionId)
+                .map(inscripcion -> {
+                    inscripcion.setEstado("CANCELADA");
+                    return mapToView(inscripcionRepository.save(inscripcion));
+                });
+    }
+    
+    public List<InscripcionView> findByStudent(Long studentId) {
+        return inscripcionRepository.findByEstudianteId(studentId)
+                .stream()
+                .map(this::mapToView)
+                .collect(Collectors.toList());
+    }
 
-       }catch(Exception error) {
-       throw new Exception("[Controlador.getUserCourses] -> " + error.getMessage());
-       }
-   }
+	private InscripcionView mapToView(Inscripcion inscripcion) {
+        return new InscripcionView(
+                inscripcion.getId(),
+                inscripcion.getEstudiante(),
+                inscripcion.getCourse(),
+                inscripcion.getFechaInscripcion(),
+                inscripcion.getEstado(),
+                inscripcion.getAsistencias()
+        );
+    }
 
 
 
@@ -636,54 +676,79 @@ public class Controlador {
 		Headquarter sedeSeleccionada = headquarterRepository.findById(sedeId).orElseThrow(() -> new HeadquarterException("La sede con id " + sedeId + " no existe."));
 		return sedeSeleccionada;
 	}
-	public CourseSchedule completarCronogramaParaCurso(String courseName, Long sedeId, CourseSchedule courseSchedule) throws Exception {
-		Course cursoExistente = getCourseByName(courseName);
-        CourseSchedule courseScheduleAsociado = cursoExistente.getCourseSchedule();
-		//List<Headquarter> headquarters = todosLasSedes();
-		
-		return courseSchedRepository.findById(courseScheduleAsociado.getId())
-				.map(existingCourseSchedule -> {
-					existingCourseSchedule.setHeadquarters(List.of(seleccionarSede(sedeId)));
-					existingCourseSchedule.setCourse(cursoExistente);
-					existingCourseSchedule.setStartDate(courseSchedule.getStartDate());
-					existingCourseSchedule.setCompletionDate(courseSchedule.getCompletionDate());
-					existingCourseSchedule.setDiaEnQueSeDicta(courseSchedule.getDiaEnQueSeDicta());
-					existingCourseSchedule.setVacancy(courseSchedule.getVacancy());
-					
-					return courseSchedRepository.save(existingCourseSchedule);
-				})
-				.orElseThrow(()-> new CourseScheduleException("No existe el cronograma con el id" + courseScheduleAsociado.getId()));
-	}
 
-	public CourseSchedule updateCourseSchedule(CourseSchedule courseSched) throws Exception {
-          try {
-            if (!courseSchedRepository.existsById(courseSched.getId())) 
-              throw new CourseException("El cronograma con id: '" + courseSched.getId() + "' no existe.");
-            
-            CourseSchedule updatedCourseSched = courseSchedRepository.save(courseSched);
-            return updatedCourseSched;
-          } catch (CourseException error) {
-            throw new CourseException(error.getMessage());
-          } catch (Exception error) {
-            throw new Exception("[Controlador.updateCourseSchedule] -> " + error.getMessage());
-          }
+	public CourseScheduleView saveCronograma(CourseScheduleView scheduleView) {
+        validateCourseSchedule(scheduleView);
+        CourseSchedule schedule = scheduleView.toEntity();
+        CourseSchedule savedSchedule = courseSchedRepository.save(schedule);
+        return savedSchedule.toView();
+    }
+    
+    public Optional<CourseScheduleView> updateCronograma(Long id, CourseScheduleView scheduleView) {
+        return courseSchedRepository.findById(id)
+                .map(existingSchedule -> {
+                    validateCourseSchedule(scheduleView);
+                    updateScheduleFields(existingSchedule, scheduleView);
+                    return courseSchedRepository.save(existingSchedule).toView();
+                });
+    }
+
+	private void validateCourseSchedule(CourseScheduleView scheduleView) {
+        if (scheduleView.getCourse() == null || scheduleView.getCourse().getId() == null) {
+            throw new IllegalArgumentException("El curso es obligatorio");
+        }
+        if (scheduleView.getHoraInicio() == null) {
+            throw new IllegalArgumentException("La hora de inicio es obligatoria");
+        }
+        if (scheduleView.getHoraFin() == null) {
+            throw new IllegalArgumentException("La hora de fin es obligatoria");
+        }
+        if (!scheduleView.getHoraInicio().isBefore(scheduleView.getHoraFin())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser anterior a la hora de fin");
+        }
+        if (scheduleView.getDiaEnQueSeDicta() < 1 || scheduleView.getDiaEnQueSeDicta() > 7) {
+            throw new IllegalArgumentException("El día debe estar entre 1 (Lunes) y 7 (Domingo)");
+        }
+        if (scheduleView.getVacancy() <= 0) {
+            throw new IllegalArgumentException("Las vacantes deben ser mayor a 0");
+        }
+        if (scheduleView.getInstructor() == null || scheduleView.getInstructor().trim().isEmpty()) {
+            throw new IllegalArgumentException("El instructor es obligatorio");
+        }
+        
+        // Validar que el curso existe
+        if (!courseRepository.existsById(scheduleView.getCourse().getId())) {
+            throw new IllegalArgumentException("El curso especificado no existe");
+        }
+    }
+    
+    private void updateScheduleFields(CourseSchedule existing, CourseScheduleView view) {
+        existing.setCourse(view.getCourse());
+        existing.setHoraInicio(view.getHoraInicio());
+        existing.setHoraFin(view.getHoraFin());
+        existing.setInstructor(view.getInstructor());
+        existing.setDiaEnQueSeDicta(view.getDiaEnQueSeDicta());
+        existing.setVacancy(view.getVacancy());
     }
 
 	@Transactional
     public void deleteCourseSchedule(Long id) throws Exception {
           try {
               
-			  CourseSchedule courseShed = courseSchedRepository.findById(id).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + id + " no existe."));
-			  //Vacio el cronograma para el curso asociado
-			  Course course = courseShed.getCourse();
-			  course.setCourseSchedule(new CourseSchedule());
+			  courseSchedRepository.findById(id).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + id + " no existe."));
 			  courseSchedRepository.deleteById(id);
-			  courseRepository.save(course);
+			
           } catch (Exception error) {
             throw new Exception("[Controlador.deleteCourseSchedule] -> " + error.getMessage());
           }
         }
 
+	public List<CourseScheduleView> findSchedByCourse(Long courseId) {
+        return courseSchedRepository.findByCourseId(courseId)
+                .stream()
+                .map(CourseSchedule::toView)
+                .collect(Collectors.toList());
+    	}
 
 	//-----------------------------------------------Headquarters--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -697,9 +762,9 @@ public class Controlador {
 
 	public void inicializarSedes() throws Exception {
 		try{	
-            Headquarter headquarter1 = new Headquarter(null, "Caballito","45678889003", "Rosario 789", "sedecaballitotl@gmail.com", "+5491130561833", "20% de reintegro", 0.2, "-70% descuento", 0.7);
-            Headquarter headquarter2 = new Headquarter(null, "Devoto", "43445567880", "Chivilcoy 3700", "sededevototl@gmail.com", "+5491120443789", "30% de reintegro", 0.3, "-70% descuento", 0.7);
-            Headquarter headquarter3 = new Headquarter(null, "Retiro","44293778034", "Pelegrini 1500", "sederetirotl@gmail.com", "+5491129387029", "25% de reintegro", 0.25, "-60% descuento", 0.6);
+            Headquarter headquarter1 = new Headquarter(null, "Caballito","45678889003", "Rosario 789", "sedecaballitotl@gmail.com", "+5491130561833", "20% de reintegro", 0.2, "-70% descuento", 0.7, new ArrayList<>());
+            Headquarter headquarter2 = new Headquarter(null, "Devoto", "43445567880", "Chivilcoy 3700", "sededevototl@gmail.com", "+5491120443789", "30% de reintegro", 0.3, "-70% descuento", 0.7, new ArrayList<>());
+            Headquarter headquarter3 = new Headquarter(null, "Retiro","44293778034", "Pelegrini 1500", "sederetirotl@gmail.com", "+5491129387029", "25% de reintegro", 0.25, "-60% descuento", 0.6, new ArrayList<>());
 
             headquarterRepository.save(headquarter1); 
 			headquarterRepository.save(headquarter2);
@@ -724,19 +789,50 @@ public class Controlador {
 		}
 	}
 
+	public HeadquarterView saveSede(HeadquarterView headquarterView) {
+        validateHeadquarter(headquarterView);
+        Headquarter headquarter = headquarterView.toEntity();
+        Headquarter savedHeadquarter = headquarterRepository.save(headquarter);
+        return savedHeadquarter.toView();
+    }
+    
+    public Optional<HeadquarterView> updateSede(Long id, HeadquarterView headquarterView) {
+        return headquarterRepository.findById(id)
+                .map(existingHeadquarter -> {
+                    validateHeadquarter(headquarterView);
+                    updateHeadquarterFields(existingHeadquarter, headquarterView);
+                    return headquarterRepository.save(existingHeadquarter).toView();
+                });
+    }
 
-	public Headquarter updateSede(Headquarter headquarter) throws Exception {
-          try {
-            if (!headquarterRepository.existsById(headquarter.getId())) 
-              throw new HeadquarterException("La sede con id: '" + headquarter.getId() + "' no existe.");
-            
-            Headquarter updatedHeadquarter = headquarterRepository.save(headquarter);
-            return updatedHeadquarter;
-          } catch (CourseException error) {
-            throw new CourseException(error.getMessage());
-          } catch (Exception error) {
-            throw new Exception("[Controlador.updateSede] -> " + error.getMessage());
-          }
+	private void validateHeadquarter(HeadquarterView headquarterView) {
+        if (headquarterView.getName() == null || headquarterView.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de la sede es obligatorio");
+        }
+        if (headquarterView.getEmail() == null || !isValidEmail(headquarterView.getEmail())) {
+            throw new IllegalArgumentException("Email inválido");
+        }
+        // Validar email único
+        Optional<Headquarter> existingByEmail = headquarterRepository.findByEmail(headquarterView.getEmail());
+        if (existingByEmail.isPresent() && !existingByEmail.get().getId().equals(headquarterView.getId())) {
+            throw new IllegalArgumentException("Ya existe una sede con este email");
+        }
+    }
+    
+    private void updateHeadquarterFields(Headquarter existing, HeadquarterView view) {
+        existing.setName(view.getName());
+        existing.setPhone(view.getPhone());
+        existing.setAddress(view.getAddress());
+        existing.setEmail(view.getEmail());
+        existing.setWhattsapp(view.getWhattsapp());
+        existing.setTypeOfBonus(view.getTypeOfBonus());
+        existing.setCourseBonus(view.getCourseBonus());
+        existing.setTypeOfPromo(view.getTypeOfPromo());
+        existing.setCoursePromo(view.getCoursePromo());
+    }
+    
+    private boolean isValidEmail(String email) {
+        return email.contains("@") && email.contains(".");
     }
 
 	@Transactional
@@ -748,40 +844,16 @@ public class Controlador {
           }
     }
 
-	public void seleccionarCursoPorSede(Long studentId, Long sedeId, Long courseId) throws Exception{
-		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("El curso con id " + courseId + " no existe."));
-		completarCronogramaParaCurso(course.getName(), sedeId, course.getCourseSchedule());
-		seleccionarCursos(studentId, courseId);
-	}
+	public List<HeadquarterView> findHeadquartersWithCourses() {
+        return headquarterRepository.findHeadquartersWithCourses()
+                .stream()
+                .map(Headquarter::toView)
+                .collect(Collectors.toList());
+    }
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public void tomarAsistencia(Long studentId) throws Exception {
-		try{
-			//verifico que existan el estudiante y a que cursos esta inscripto:
-			Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
-			List <Course> cantDeCursos = student.getCourses();
-			//Por cada curso en el que esta inscripto, pido su cronograma
-			//con cada cronograma pregunto si el dia de la semana presente corresponde con el dia de la semana en que se cursa el curso
-			for (Course course: cantDeCursos){
-				CourseSchedule courseSched = course.getCourseSchedule();
-				if(courseSched.getDiaEnQueSeDicta() == LocalDate.now().getDayOfWeek()){
-					CourseAttended courseAttended = CourseAttended.builder()
-						.courseSchedule(courseSched)
-						.student(student)
-						.fechaAsistencia(LocalDate.now())
-						.build();
-
-					courseAttendRepository.save(courseAttended);
-
-				} else System.out.println("No le corresponde asistir hoy");
-			} 
-		
-		} catch (Exception error) {
-			throw new Exception("[Controlador.tomarAsistencia] -> " + error.getMessage());
-		}
-		
-	}
+	
 
 	
 }

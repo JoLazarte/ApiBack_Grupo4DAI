@@ -6,8 +6,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uade.tpo.api_grupo4.controllers.person.PersonView;
 import com.uade.tpo.api_grupo4.entity.Course;
+import com.uade.tpo.api_grupo4.entity.Inscripcion;
 import com.uade.tpo.api_grupo4.entity.Student;
 
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -18,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class StudentView extends PersonView {
 
     @JsonIgnore
-    private List<Course> courses;
+    private List<Inscripcion> courses;
     private String cardNumber;
     private String dniFrente;
     private String dniDorso;
@@ -30,7 +33,7 @@ public class StudentView extends PersonView {
     // ---> CONSTRUCTOR CORREGIDO USANDO SUPER() <---
     public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
                        String phone, String address, String urlAvatar, Boolean permissionGranted,
-                       List<Course> courses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
+                       List<Inscripcion> courses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
                        String nroDocumento, String tipoTarjeta) {
 
         // 1. Llamamos al constructor del padre (PersonView) para que él asigne sus campos.

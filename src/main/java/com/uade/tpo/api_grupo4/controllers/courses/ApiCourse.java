@@ -5,8 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,17 +13,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uade.tpo.api_grupo4.controllers.Controlador;
 
 import com.uade.tpo.api_grupo4.entity.Course;
-
+import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.ResponseData;
-import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
-import com.uade.tpo.api_grupo4.exceptions.UserException;
+
 
 @RestController
 @RequestMapping("/apiCourse")
@@ -89,11 +88,8 @@ public class ApiCourse {
     public ResponseEntity<ResponseData<?>> updateCourse(@RequestBody CourseView courseView) {
         try {
         Course course = courseView.toEntity();
-
         Course updatedCourse = controlador.updateCourse(course);
-
         CourseView updatedCourseView = updatedCourse.toView();
-
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(updatedCourseView));
 
         }catch (CourseException error) {
@@ -118,6 +114,31 @@ public class ApiCourse {
         }
     }
 
+    @GetMapping("/by-headquarters/{sedeId}")
+    public ResponseEntity<List<CourseView>> getCoursesByHeadquarter(@PathVariable Long sedeId) {
+        try {
+            List<CourseView> courses = controlador.findByHeadquarter(sedeId);
+            return ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/by-mode/{mode}")
+    public ResponseEntity<List<CourseView>> getCoursesByMode(@PathVariable CourseMode mode) {
+        try {
+            List<CourseView> courses = controlador.findByMode(mode);
+            return ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    
+
+
+
+
     @PutMapping("{studentId}/{courseId}")
     public ResponseEntity<ResponseData<?>> seleccionarCurso(@PathVariable Long studentId, @PathVariable Long courseId) {
         try {
@@ -135,24 +156,7 @@ public class ApiCourse {
         }
     }
 
-    @GetMapping("/studentCourses")
-    public ResponseEntity<ResponseData<?>> getStudentCourses(@AuthenticationPrincipal UserDetails userDetails) {
-        try {
-        Student authUser = controlador.findStudentByUsername(userDetails.getUsername());
-
-        List<CourseView> cursos = controlador.getStudentCourses(authUser.getId()).stream().map(Course::toView).toList();
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(cursos));
-
-        } catch (UserException error) {
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(ResponseData.error(error.getMessage()));
-
-        } catch (Exception error) {
-        System.out.printf("[ApiCourse.getStudentCourses] -> %s", error.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ResponseData.error("No se pudieron obtener los cursos."));
-        }
-    }
+    
 
     
 }

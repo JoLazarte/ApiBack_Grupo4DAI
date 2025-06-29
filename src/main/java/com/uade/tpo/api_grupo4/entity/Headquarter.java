@@ -1,14 +1,18 @@
 package com.uade.tpo.api_grupo4.entity;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.uade.tpo.api_grupo4.controllers.headquarter.HeadquarterView;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +39,8 @@ public class Headquarter  {
     private Double courseBonus;	
     private String typeOfPromo;	
     private Double coursePromo;
-
+    @OneToMany(mappedBy = "sede", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Course> cursos;
     public HeadquarterView toView(){
         return new HeadquarterView(
             this.id,
@@ -47,7 +52,8 @@ public class Headquarter  {
             this.typeOfBonus,
             this.courseBonus,
             this.typeOfPromo,
-            this.coursePromo
+            this.coursePromo,
+            this.cursos
            
         );
     }

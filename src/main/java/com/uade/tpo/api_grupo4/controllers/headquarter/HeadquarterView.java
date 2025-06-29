@@ -1,5 +1,9 @@
 package com.uade.tpo.api_grupo4.controllers.headquarter;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +22,8 @@ public class HeadquarterView {
     private Double courseBonus;	
     private String typeOfPromo;	
     private Double coursePromo;
-
+    @JsonIgnore
+    private List<Course> cursos;
     public Headquarter toEntity(){
         return new Headquarter(
             this.id,
@@ -30,7 +35,8 @@ public class HeadquarterView {
             this.typeOfBonus,
             this.courseBonus,
             this.typeOfPromo,
-            this.coursePromo
+            this.coursePromo,
+            this.cursos
            
         );
     }

@@ -21,6 +21,8 @@ import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 import com.uade.tpo.api_grupo4.exceptions.HeadquarterException;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/apiHeadquarter")
 public class ApiHeadquarter {
@@ -60,23 +62,29 @@ public class ApiHeadquarter {
         }
   }
 
-   @PutMapping("")
-    public ResponseEntity<ResponseData<?>> updateSede(@RequestBody HeadquarterView headquarterView) {
+   @PostMapping
+    public ResponseEntity<HeadquarterView> createHeadquarter(@Valid @RequestBody HeadquarterView headquarterView) {
         try {
-        Headquarter headquarter = headquarterView.toEntity();
-
-        Headquarter updatedSede = controlador.updateSede(headquarter);
-
-        HeadquarterView updatedHeadquarterView = updatedSede.toView();
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(updatedHeadquarterView));
-
-        }catch (CourseScheduleException error) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
-
-        } catch (Exception error) {
-        System.out.printf("[ApiHeadquarter.updateSede] -> %s", error.getMessage() );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo actualizar la sede"));
+            HeadquarterView savedHeadquarter = controlador.saveSede(headquarterView);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedHeadquarter);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<HeadquarterView> updateHeadquarter(@PathVariable Long id, 
+                                                           @Valid @RequestBody HeadquarterView headquarterView) {
+        try {
+            return controlador.updateSede(id, headquarterView)
+                    .map(updatedHeadquarter -> ResponseEntity.ok(updatedHeadquarter))
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -93,21 +101,15 @@ public class ApiHeadquarter {
         }
     }
 
-    @PutMapping("{studentId}/{courseId}/{sedeId}")
-    public ResponseEntity<ResponseData<?>> seleccionarCursoPorSede(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable Long sedeId) {
+    @GetMapping("/with-courses")
+    public ResponseEntity<List<HeadquarterView>> getHeadquartersWithCourses() {
         try {
-            
-            controlador.seleccionarCursoPorSede(studentId, courseId,  sedeId);
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("Curso seleccionado con exito"));
-
-            } catch (CourseException |HeadquarterException error) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
-
-        } catch (Exception error) {
-        System.out.printf("[ApiHeadquarter.seleccionarCursoPorSede] -> %s", error.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ResponseData.error("No se pudo seleccionar el curso"));
+            List<HeadquarterView> headquarters = controlador.findHeadquartersWithCourses();
+            return ResponseEntity.ok(headquarters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+    
 }

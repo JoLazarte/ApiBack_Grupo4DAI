@@ -1,10 +1,14 @@
 package com.uade.tpo.api_grupo4.controllers.courseSchedule;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +22,8 @@ import com.uade.tpo.api_grupo4.entity.ResponseData;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/apiCourseSchedule")
@@ -30,44 +36,29 @@ public class ApiCourseSchedule {
         this.controlador = controlador;
     }
 
-    @PutMapping("{courseName}/{sedeId}")
-    public ResponseEntity<ResponseData<?>> completarCronogramaParaCurso(@PathVariable String courseName, @PathVariable Long sedeId, @RequestBody CourseScheduleView courseScheduleView) {
+    @PostMapping
+    public ResponseEntity<CourseScheduleView> createSchedule(@Valid @RequestBody CourseScheduleView scheduleView) {
         try {
-            Course cursoExistente = controlador.getCourseByName(courseName);
-            CourseSchedule courseSchedule = cursoExistente.getCourseSchedule();
-            courseSchedule = courseScheduleView.toEntity();
-            CourseSchedule completedCourseSchedule = controlador.completarCronogramaParaCurso(courseName, sedeId, courseSchedule);
-            CourseScheduleView competedCourseScheduleView = completedCourseSchedule.toView();
-            
-            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(competedCourseScheduleView));
-
-            } catch (CourseException | CourseScheduleException error) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
-
-        } catch (Exception error) {
-        System.out.printf("[ApiCourseSchedule.completarCronogramaParaCurso] -> %s", error.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ResponseData.error("No se pudo completar el cronograma"));
+            CourseScheduleView savedSchedule = controlador.saveCronograma(scheduleView);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedSchedule);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @PutMapping("")
-    public ResponseEntity<ResponseData<?>> updateCourseSchedule(@RequestBody CourseScheduleView courseSchedView) {
+    @PutMapping("/{id}")
+    public ResponseEntity<CourseScheduleView> updateSchedule(@PathVariable Long id, 
+                                                           @Valid @RequestBody CourseScheduleView scheduleView) {
         try {
-        CourseSchedule courseSched = courseSchedView.toEntity();
-
-        CourseSchedule updatedCourseSched = controlador.updateCourseSchedule(courseSched);
-
-        CourseScheduleView updatedCourseSchedView = updatedCourseSched.toView();
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(updatedCourseSchedView));
-
-        }catch (CourseScheduleException error) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
-
-        } catch (Exception error) {
-        System.out.printf("[ApiCourseSchedule.updateCourseSchedule] -> %s", error.getMessage() );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo actualizar el cronograma"));
+            return controlador.updateCronograma(id, scheduleView)
+                    .map(updatedSchedule -> ResponseEntity.ok(updatedSchedule))
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -81,6 +72,16 @@ public class ApiCourseSchedule {
         } catch (Exception error) {
         System.out.printf("[ApiCourseSchedule.deleteCourseSchedule] -> %s", error.getMessage() );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo eliminar el cronograma"));
+        }
+    }
+
+    @GetMapping("/by-course/{courseId}")
+    public ResponseEntity<List<CourseScheduleView>> getSchedulesByCourse(@PathVariable Long courseId) {
+        try {
+            List<CourseScheduleView> schedules = controlador.findSchedByCourse(courseId);
+            return ResponseEntity.ok(schedules);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
