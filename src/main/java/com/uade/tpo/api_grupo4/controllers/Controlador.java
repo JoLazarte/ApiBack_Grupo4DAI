@@ -619,7 +619,11 @@ public class Controlador {
 
 	public List<Course> getStudentCourses(Long studentId) throws Exception {
 		try{
-		return courseRepository.findByStudentId(studentId);
+			Student student = studentRepository.findById(studentId)
+				.orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+
+			return student.getCourses();
+			
 		}catch(Exception error) {
 		throw new Exception("[Controlador.getUserCourses] -> " + error.getMessage());
 		}
