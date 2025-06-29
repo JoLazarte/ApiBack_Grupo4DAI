@@ -542,11 +542,11 @@ public class Controlador {
 	public void inicializarCursos() throws Exception {
 		try{	
 
-            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. ", "No necesitas conocimientos previos.", 120, 600.0, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con los principios básicos de la cocina vegana. ", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, LocalDate.of(2025, 8, 8), LocalDate.of(2025, 11, 8), new Headquarter(), new ArrayList<>(), new ArrayList<>());
 
-            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave: Arroz, fideos, soja, diferentes tipos de verduras y especias.", "Conocimientos básicos de cocina.", 180, 800.0, CourseMode.PRESENCIAL, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave: Arroz, fideos, soja, diferentes tipos de verduras y especias.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  LocalDate.of(2025, 8, 8), LocalDate.of(2025, 11, 8), new Headquarter(), new ArrayList<>(), new ArrayList<>());
          
-            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer y a elegir los ingredientes, la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400.0, CourseMode.VIRTUAL, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer y a elegir los ingredientes, la utilización de los utensilios, detalles de decoración y la conservación de todas las preparaciones .", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  LocalDate.of(2025, 8, 8), LocalDate.of(2025, 11, 8), new Headquarter(), new ArrayList<>(), new ArrayList<>());
            
 
             courseRepository.save(course1); 
