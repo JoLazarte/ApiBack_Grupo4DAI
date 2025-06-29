@@ -153,8 +153,6 @@ public class ApiCourse {
             .body(ResponseData.error("No se pudieron obtener los cursos."));
         }
     }
-    
-
 
     
 }

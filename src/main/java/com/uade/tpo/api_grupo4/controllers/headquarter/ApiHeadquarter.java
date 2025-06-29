@@ -15,12 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uade.tpo.api_grupo4.controllers.Controlador;
-import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
-import com.uade.tpo.api_grupo4.entity.Course;
-import com.uade.tpo.api_grupo4.entity.CourseSchedule;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
 import com.uade.tpo.api_grupo4.entity.ResponseData;
-import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 import com.uade.tpo.api_grupo4.exceptions.HeadquarterException;
 

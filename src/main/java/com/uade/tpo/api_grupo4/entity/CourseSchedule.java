@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
 
 import jakarta.persistence.CascadeType;

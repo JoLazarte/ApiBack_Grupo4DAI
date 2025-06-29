@@ -618,16 +618,16 @@ public class Controlador {
 	}
 
 	public List<Course> getStudentCourses(Long studentId) throws Exception {
-		try{
-			Student student = studentRepository.findById(studentId)
-				.orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+       try{
+           Student student = studentRepository.findById(studentId)
+               .orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+           return student.getCourses();
 
-			return student.getCourses();
-			
-		}catch(Exception error) {
-		throw new Exception("[Controlador.getUserCourses] -> " + error.getMessage());
-		}
-	}
+       }catch(Exception error) {
+       throw new Exception("[Controlador.getUserCourses] -> " + error.getMessage());
+       }
+   }
+
 
 
 	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------

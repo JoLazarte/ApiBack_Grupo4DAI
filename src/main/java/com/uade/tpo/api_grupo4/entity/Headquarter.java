@@ -1,5 +1,7 @@
 package com.uade.tpo.api_grupo4.entity;
 
+import java.io.Serializable;
+
 import com.uade.tpo.api_grupo4.controllers.headquarter.HeadquarterView;
 
 import jakarta.persistence.Column;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Headquarter {
+public class Headquarter  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
