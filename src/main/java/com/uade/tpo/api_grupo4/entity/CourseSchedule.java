@@ -1,6 +1,7 @@
 package com.uade.tpo.api_grupo4.entity;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,8 +15,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +38,7 @@ public class CourseSchedule implements Serializable {
     private Course course;
     private LocalDate startDate;
     private LocalDate completionDate;
+    private DayOfWeek diaEnQueSeDicta;
     private int vacancy;
 
     public CourseScheduleView toView() {
@@ -48,6 +48,7 @@ public class CourseSchedule implements Serializable {
                 this.course,
                 this.startDate,
                 this.completionDate,
+                this.diaEnQueSeDicta,
                 this.vacancy);
     }
 }

@@ -20,9 +20,6 @@ import com.uade.tpo.api_grupo4.entity.ResponseData;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 
-
-
-
 @RestController
 @RequestMapping("/apiCourse")
 public class ApiCourse {

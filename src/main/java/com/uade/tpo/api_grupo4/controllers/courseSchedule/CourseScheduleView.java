@@ -1,5 +1,6 @@
 package com.uade.tpo.api_grupo4.controllers.courseSchedule;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class CourseScheduleView {
     private Course course;
     private LocalDate startDate;
     private LocalDate completionDate;
+    private DayOfWeek diaEnQueSeDicta;
     private int vacancy;
 
     public CourseSchedule toEntity() {
@@ -30,6 +32,7 @@ public class CourseScheduleView {
                 this.course,
                 this.startDate,
                 this.completionDate,
+                this.diaEnQueSeDicta,
                 this.vacancy
                 );
     }

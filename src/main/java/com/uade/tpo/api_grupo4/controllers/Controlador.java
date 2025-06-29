@@ -426,6 +426,7 @@ public class Controlador {
 					existingCourseSchedule.setCourse(cursoExistente);
 					existingCourseSchedule.setStartDate(courseSchedule.getStartDate());
 					existingCourseSchedule.setCompletionDate(courseSchedule.getCompletionDate());
+					existingCourseSchedule.setDiaEnQueSeDicta(courseSchedule.getDiaEnQueSeDicta());
 					existingCourseSchedule.setVacancy(courseSchedule.getVacancy());
 					
 					return courseSchedRepository.save(existingCourseSchedule);
@@ -473,17 +474,31 @@ public class Controlador {
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public void tomarAsistencia(Long studentId, Long courseSchedId){
-		//verifico que existan tanto el estudiante como el cronograma ingresados:
-		CourseSchedule courseSched = courseSchedRepository.findById(courseSchedId).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + courseSchedId + " no existe."));
-		Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+	public void tomarAsistencia(Long studentId) throws Exception {
+		try{
+			//verifico que existan el estudiante y a que cursos esta inscripto:
+			Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentException("El estudiante con id " + studentId + " no existe."));
+			List <Course> cantDeCursos = student.getCourses();
+			//Por cada curso en el que esta inscripto, pido su cronograma
+			//con cada cronograma pregunto si el dia de la semana presente corresponde con el dia de la semana en que se cursa el curso
+			for (Course course: cantDeCursos){
+				CourseSchedule courseSched = course.getCourseSchedule();
+				if(courseSched.getDiaEnQueSeDicta() == LocalDate.now().getDayOfWeek()){
+					CourseAttended courseAttended = CourseAttended.builder()
+						.courseSchedule(courseSched)
+						.student(student)
+						.fechaAsistencia(LocalDate.now())
+						.build();
+
+					courseAttendRepository.save(courseAttended);
+
+				} else System.out.println("No le corresponde asistir hoy");
+			} 
 		
-		CourseAttended courseAttended = CourseAttended.builder()
-				.courseSchedule(courseSched)
-				.student(student)
-				.fechaAsistencia(LocalDate.now())
-				.build();
-		courseAttendRepository.save(courseAttended);
+		} catch (Exception error) {
+			throw new Exception("[Controlador.tomarAsistencia] -> " + error.getMessage());
+		}
+		
 	}
 
 	
