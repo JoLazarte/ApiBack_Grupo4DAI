@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.uade.tpo.api_grupo4.controllers.Controlador;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
 import com.uade.tpo.api_grupo4.entity.ResponseData;
+import com.uade.tpo.api_grupo4.exceptions.CourseException;
 import com.uade.tpo.api_grupo4.exceptions.CourseScheduleException;
 import com.uade.tpo.api_grupo4.exceptions.HeadquarterException;
 
@@ -89,6 +90,23 @@ public class ApiHeadquarter {
         } catch (Exception error) {
         System.out.printf("[ApiHeadquarter.deleteSede] -> %s", error.getMessage() );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo eliminar la sede"));
+        }
+    }
+
+    @PutMapping("{studentId}/{courseId}/{sedeId}")
+    public ResponseEntity<ResponseData<?>> seleccionarCursoPorSede(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable Long sedeId) {
+        try {
+            
+            controlador.seleccionarCursoPorSede(studentId, courseId,  sedeId);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success("Curso seleccionado con exito"));
+
+            } catch (CourseException |HeadquarterException error) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
+
+        } catch (Exception error) {
+        System.out.printf("[ApiHeadquarter.seleccionarCursoPorSede] -> %s", error.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(ResponseData.error("No se pudo seleccionar el curso"));
         }
     }
 

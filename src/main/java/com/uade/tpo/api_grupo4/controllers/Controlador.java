@@ -632,14 +632,18 @@ public class Controlador {
 
 	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public CourseSchedule completarCronogramaParaCurso(String courseName, CourseSchedule courseSchedule) throws Exception {
+	public Headquarter seleccionarSede(Long sedeId){
+		Headquarter sedeSeleccionada = headquarterRepository.findById(sedeId).orElseThrow(() -> new HeadquarterException("La sede con id " + sedeId + " no existe."));
+		return sedeSeleccionada;
+	}
+	public CourseSchedule completarCronogramaParaCurso(String courseName, Long sedeId, CourseSchedule courseSchedule) throws Exception {
 		Course cursoExistente = getCourseByName(courseName);
         CourseSchedule courseScheduleAsociado = cursoExistente.getCourseSchedule();
-		List<Headquarter> headquarters = todosLasSedes();
+		//List<Headquarter> headquarters = todosLasSedes();
 		
 		return courseSchedRepository.findById(courseScheduleAsociado.getId())
 				.map(existingCourseSchedule -> {
-					existingCourseSchedule.setHeadquarters(headquarters);
+					existingCourseSchedule.setHeadquarters(List.of(seleccionarSede(sedeId)));
 					existingCourseSchedule.setCourse(cursoExistente);
 					existingCourseSchedule.setStartDate(courseSchedule.getStartDate());
 					existingCourseSchedule.setCompletionDate(courseSchedule.getCompletionDate());
@@ -743,6 +747,12 @@ public class Controlador {
             throw new Exception("[Controlador.deleteSede] -> " + error.getMessage());
           }
     }
+
+	public void seleccionarCursoPorSede(Long studentId, Long sedeId, Long courseId) throws Exception{
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("El curso con id " + courseId + " no existe."));
+		completarCronogramaParaCurso(course.getName(), sedeId, course.getCourseSchedule());
+		seleccionarCursos(studentId, courseId);
+	}
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	

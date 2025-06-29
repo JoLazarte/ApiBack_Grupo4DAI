@@ -30,13 +30,13 @@ public class ApiCourseSchedule {
         this.controlador = controlador;
     }
 
-    @PutMapping("/course/{courseName}")
-    public ResponseEntity<ResponseData<?>> completarCronogramaParaCurso(@PathVariable String courseName, @RequestBody CourseScheduleView courseScheduleView) {
+    @PutMapping("{courseName}/{sedeId}")
+    public ResponseEntity<ResponseData<?>> completarCronogramaParaCurso(@PathVariable String courseName, @PathVariable Long sedeId, @RequestBody CourseScheduleView courseScheduleView) {
         try {
             Course cursoExistente = controlador.getCourseByName(courseName);
             CourseSchedule courseSchedule = cursoExistente.getCourseSchedule();
             courseSchedule = courseScheduleView.toEntity();
-            CourseSchedule completedCourseSchedule = controlador.completarCronogramaParaCurso(courseName, courseSchedule);
+            CourseSchedule completedCourseSchedule = controlador.completarCronogramaParaCurso(courseName, sedeId, courseSchedule);
             CourseScheduleView competedCourseScheduleView = completedCourseSchedule.toView();
             
             return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(competedCourseScheduleView));
