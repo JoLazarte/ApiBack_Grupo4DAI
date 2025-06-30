@@ -721,6 +721,7 @@ public class Controlador {
 			}
 			return cursos;
 	}
+	
 
 	public Course getCourseById(Long courseId) throws Exception {
 		try{

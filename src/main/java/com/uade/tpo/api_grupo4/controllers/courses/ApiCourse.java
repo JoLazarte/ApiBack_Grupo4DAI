@@ -20,6 +20,7 @@ import com.uade.tpo.api_grupo4.controllers.Controlador;
 
 import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseMode;
+import com.uade.tpo.api_grupo4.entity.Headquarter;
 import com.uade.tpo.api_grupo4.entity.ResponseData;
 import com.uade.tpo.api_grupo4.exceptions.CourseException;
 
@@ -46,6 +47,7 @@ public class ApiCourse {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
         }
     }
+   
     //Se puede crear un curso nuevo con un body por postman:
     @PostMapping("")
     public ResponseEntity<ResponseData<?>> createCourse(@RequestBody CourseView courseView) {
