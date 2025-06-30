@@ -888,7 +888,7 @@ public class Controlador {
         
         Inscripcion inscripcion = Inscripcion.builder()
                 .student(student)
-                .course(courseSchedule)
+                .courseSchedule(courseSchedule)
                 .fechaInscripcion(LocalDateTime.now())
                 .estado("ACTIVA")
                 .build();
@@ -918,7 +918,7 @@ public class Controlador {
         return new InscripcionView(
                 inscripcion.getId(),
                 inscripcion.getStudent(),
-                inscripcion.getCourse(),
+                inscripcion.getCourseSchedule(),
                 inscripcion.getFechaInscripcion(),
                 inscripcion.getEstado(),
                 inscripcion.getAsistencias()

@@ -20,7 +20,7 @@ public class InscripcionView {
 
     private Student student;
  
-    private CourseSchedule course;
+    private CourseSchedule courseSchedule;
     
     private LocalDateTime fechaInscripcion;
     
@@ -32,7 +32,7 @@ public class InscripcionView {
         return new Inscripcion(
             this.id,
             this.student,
-            this.course,
+            this.courseSchedule,
             this.fechaInscripcion,
             this.estado,
             this.asistencias

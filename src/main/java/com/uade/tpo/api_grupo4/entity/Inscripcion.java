@@ -36,7 +36,7 @@ public class Inscripcion {
     @ManyToOne
     @JoinColumn(nullable = false, name = "courseSchedule_id")
    //@JsonBackReference
-    private CourseSchedule course;
+    private CourseSchedule courseSchedule;
     
     @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDateTime fechaInscripcion;
@@ -51,7 +51,7 @@ public class Inscripcion {
         return new InscripcionView(
             this.id,
             this.student,
-            this.course,
+            this.courseSchedule,
             this.fechaInscripcion,
             this.estado,
             this.asistencias
