@@ -16,7 +16,7 @@ import lombok.Data;
 public class InscripcionView {
     private Long id;
 
-    private Student estudiante;
+    private Student student;
  
     private Course course;
     
@@ -29,7 +29,7 @@ public class InscripcionView {
     public Inscripcion toEntity(){
         return new Inscripcion(
             this.id,
-            this.estudiante,
+            this.student,
             this.course,
             this.fechaInscripcion,
             this.estado,

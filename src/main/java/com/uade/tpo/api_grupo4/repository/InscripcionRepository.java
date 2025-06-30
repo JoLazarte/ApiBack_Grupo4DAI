@@ -14,14 +14,14 @@ import com.uade.tpo.api_grupo4.entity.Student;
 
 @Repository
 public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> {
-    List<Inscripcion> findByEstudiante(Student estudiante);
-    List<Inscripcion> findByEstudianteId(Long estudianteId);
+    List<Inscripcion> findByStudent(Student student);
+    List<Inscripcion> findByStudentId(Long studentId);
     List<Inscripcion> findByCourse(Course course);
     List<Inscripcion> findByCourseId(Long courseId);
     List<Inscripcion> findByEstado(String estado);
-    Optional<Inscripcion> findByEstudianteAndCourse(Student estudiante, Course course);
+    Optional<Inscripcion> findByStudentAndCourse(Student student, Course course);
     
-    @Query("SELECT i FROM Inscripcion i WHERE i.estudiante.id = :studentId AND i.estado = 'ACTIVA'")
+    @Query("SELECT i FROM Inscripcion i WHERE i.student.id = :studentId AND i.estado = 'ACTIVA'")
     List<Inscripcion> findActiveInscriptionsByStudent(@Param("studentId") Long studentId);
     
     @Query("SELECT i FROM Inscripcion i WHERE i.course.sede.id = :sedeId")

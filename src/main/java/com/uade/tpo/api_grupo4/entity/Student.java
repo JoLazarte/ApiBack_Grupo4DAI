@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.uade.tpo.api_grupo4.controllers.student.StudentView;
 
 import jakarta.persistence.CascadeType;
@@ -25,7 +27,8 @@ import lombok.experimental.SuperBuilder;
 @Entity
 public class Student extends Person{
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Inscripcion> courses;
 
     private String cardNumber;

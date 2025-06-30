@@ -19,8 +19,8 @@ public class CourseScheduleView {
     private Long id;
     private Course course;
     private int vacancy;
-    private LocalTime horaInicio;
-    private LocalTime horaFin;
+    private String horaInicio;
+    private String horaFin;
     private int diaEnQueSeDicta;
     private String instructor;
     

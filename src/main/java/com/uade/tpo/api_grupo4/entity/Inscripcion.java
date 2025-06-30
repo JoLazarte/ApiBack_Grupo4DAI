@@ -3,6 +3,9 @@ package com.uade.tpo.api_grupo4.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.uade.tpo.api_grupo4.controllers.courses.InscripcionView;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,11 +29,13 @@ public class Inscripcion {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "estudiante_id", nullable = false)
-    private Student estudiante;
+    @JoinColumn(name = "student_id", nullable = false)
+    @JsonBackReference
+    private Student student;
     
     @ManyToOne
-    @JoinColumn(name = "curso_id", nullable = false)
+    @JoinColumn(nullable = false, name = "course_id")
+   //@JsonBackReference
     private Course course;
     
     @Column(name = "fecha_inscripcion", nullable = false)
@@ -45,11 +50,11 @@ public class Inscripcion {
     public InscripcionView toView(){
         return new InscripcionView(
             this.id,
-            this.estudiante,
+            this.student,
             this.course,
             this.fechaInscripcion,
             this.estado,
-            this.asistencias,
+            this.asistencias
             
         );
     }

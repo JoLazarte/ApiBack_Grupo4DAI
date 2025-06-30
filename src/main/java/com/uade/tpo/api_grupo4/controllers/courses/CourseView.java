@@ -23,8 +23,8 @@ public class CourseView {
     private int length;
     private int price;
     private CourseMode mode;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    private String fechaInicio;
+    private String fechaFin;
     private Headquarter sede;
     
     @JsonIgnore

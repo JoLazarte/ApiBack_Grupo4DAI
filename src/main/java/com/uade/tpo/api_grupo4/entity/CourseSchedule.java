@@ -18,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,14 +34,14 @@ public class CourseSchedule implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "course_id")
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "course_id")
+    //@JsonBackReference
     private Course course;
     @Column(name = "hora_inicio", nullable = false)
-    private LocalTime horaInicio;
+    private String horaInicio;
     @Column(name = "hora_fin", nullable = false)
-    private LocalTime horaFin;
+    private String horaFin;
     private String instructor;
     private int diaEnQueSeDicta;
     private int vacancy;

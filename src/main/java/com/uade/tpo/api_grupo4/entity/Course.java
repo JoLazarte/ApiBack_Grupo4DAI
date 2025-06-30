@@ -34,25 +34,25 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     private String requirements;
     private int length;
     private int price;
     private CourseMode mode;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    private String fechaInicio;
+    private String fechaFin;
     @ManyToOne
     @JoinColumn(name = "headquarter_id", nullable = false)
     private Headquarter sede;
     
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+   
     private List<CourseSchedule> cronogramas;
-    @OneToOne(cascade = CascadeType.ALL)
 
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    //@JsonManagedReference
     private List<Inscripcion> inscripciones;
-
 
     public CourseView toView(){
         return new CourseView(
