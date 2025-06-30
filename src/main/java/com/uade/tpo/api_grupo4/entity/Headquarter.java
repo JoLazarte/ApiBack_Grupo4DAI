@@ -40,8 +40,7 @@ public class Headquarter  {
     private Double courseBonus;	
     private String typeOfPromo;	
     private Double coursePromo;
-    @ManyToMany(mappedBy = "sedes")   
-    private List<Course> cursos;
+  
     public HeadquarterView toView(){
         return new HeadquarterView(
             this.id,
@@ -53,8 +52,8 @@ public class Headquarter  {
             this.typeOfBonus,
             this.courseBonus,
             this.typeOfPromo,
-            this.coursePromo,
-            this.cursos
+            this.coursePromo
+          
            
         );
     }

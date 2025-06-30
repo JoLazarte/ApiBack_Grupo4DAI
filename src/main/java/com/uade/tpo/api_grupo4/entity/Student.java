@@ -5,14 +5,11 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.uade.tpo.api_grupo4.controllers.student.StudentView;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,10 +23,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 public class Student extends Person{
-
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Inscripcion> courses;
 
     private String cardNumber;
     @Column(columnDefinition = "LONGTEXT")
@@ -45,7 +38,7 @@ public class Student extends Person{
     public StudentView toView(){
         return new StudentView(
                 this.id, this.username, this.firstName, this.lastName, this.email, this.password,
-                this.phone, this.address, this.urlAvatar, this.permissionGranted, this.courses,
+                this.phone, this.address, this.urlAvatar, this.permissionGranted,
                 this.cardNumber, this.dniFrente, this.dniDorso, this.nroTramite, this.cuentaCorriente,
                 this.nroDocumento, this.tipoTarjeta
         );

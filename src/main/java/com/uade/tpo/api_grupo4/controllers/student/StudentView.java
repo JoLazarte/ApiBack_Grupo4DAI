@@ -20,8 +20,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // Lombok usará el constructor de abajo
 public class StudentView extends PersonView {
 
-    @JsonIgnore
-    private List<Inscripcion> courses;
     private String cardNumber;
     private String dniFrente;
     private String dniDorso;
@@ -33,14 +31,13 @@ public class StudentView extends PersonView {
     // ---> CONSTRUCTOR CORREGIDO USANDO SUPER() <---
     public StudentView(Long id, String username, String firstName, String lastName, String email, String password,
                        String phone, String address, String urlAvatar, Boolean permissionGranted,
-                       List<Inscripcion> courses, String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
+                       String cardNumber, String dniFrente, String dniDorso, String nroTramite, int cuentaCorriente,
                        String nroDocumento, String tipoTarjeta) {
 
         // 1. Llamamos al constructor del padre (PersonView) para que él asigne sus campos.
         super(id, username, firstName, lastName, email, password, phone, address, urlAvatar, permissionGranted);
 
         // 2. Aquí solo asignamos los campos propios de StudentView.
-        this.courses = courses;
         this.cardNumber = cardNumber;
         this.dniFrente = dniFrente;
         this.dniDorso = dniDorso;
@@ -63,7 +60,7 @@ public class StudentView extends PersonView {
                 .address(this.getAddress())
                 .urlAvatar(this.getUrlAvatar())
                 .permissionGranted(this.getPermissionGranted())
-                .courses(this.courses) // Los campos propios se pueden acceder directamente
+                // Los campos propios se pueden acceder directamente
                 .cardNumber(this.cardNumber)
                 .dniFrente(this.dniFrente)
                 .dniDorso(this.dniDorso)

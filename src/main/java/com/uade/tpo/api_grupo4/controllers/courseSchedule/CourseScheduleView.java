@@ -27,8 +27,7 @@ public class CourseScheduleView {
     private String instructor;
     private int vacancy;
     private int diaEnQueSeDicta;
-     @JsonIgnore
-    private List<Inscripcion> inscripciones;
+
     private Headquarter sede;
     public CourseSchedule toEntity() {
         return new CourseSchedule(
@@ -39,7 +38,6 @@ public class CourseScheduleView {
                 this.instructor,
                 this.vacancy,
                 this.diaEnQueSeDicta,
-                this.inscripciones,
                 this.sede
                 );
     }

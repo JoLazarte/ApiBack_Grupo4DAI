@@ -173,7 +173,6 @@ public class Controlador {
 					.address(request.getAddress())
 					.urlAvatar(request.getUrlAvatar())
 					.permissionGranted(false)
-					.courses(new ArrayList<>())
 					.cardNumber(request.getCardNumber())
 					.dniFrente(request.getDniFrente())
 					.dniDorso(request.getDniDorso())
@@ -263,7 +262,6 @@ public class Controlador {
 	public Student agregarEstudiante(Long id, Student student) throws StudentException {
 		return studentRepository.findById(id)
 				.map(existingStudent -> {
-					existingStudent.setCourses(new ArrayList<>());
 					existingStudent.setCardNumber(student.getCardNumber());
 					existingStudent.setDniFrente(student.getDniFrente());
 					existingStudent.setDniDorso(student.getDniDorso());
@@ -635,9 +633,9 @@ public class Controlador {
 
 	public void inicializarSedes() throws Exception {
 		try{	
-            Headquarter headquarter1 = new Headquarter(null, "Caballito","45678889003", "Rosario 789", "sedecaballitotl@gmail.com", "+5491130561833", "20% de reintegro", 0.2, "-70% descuento", 0.7, new ArrayList<>());
-            Headquarter headquarter2 = new Headquarter(null, "Devoto", "43445567880", "Chivilcoy 3700", "sededevototl@gmail.com", "+5491120443789", "30% de reintegro", 0.3, "-70% descuento", 0.7, new ArrayList<>());
-            Headquarter headquarter3 = new Headquarter(null, "Retiro","44293778034", "Pelegrini 1500", "sederetirotl@gmail.com", "+5491129387029", "25% de reintegro", 0.25, "-60% descuento", 0.6, new ArrayList<>());
+            Headquarter headquarter1 = new Headquarter(null, "Caballito","45678889003", "Rosario 789", "sedecaballitotl@gmail.com", "+5491130561833", "20% de reintegro", 0.2, "-70% descuento", 0.7);
+            Headquarter headquarter2 = new Headquarter(null, "Devoto", "43445567880", "Chivilcoy 3700", "sededevototl@gmail.com", "+5491120443789", "30% de reintegro", 0.3, "-70% descuento", 0.7);
+            Headquarter headquarter3 = new Headquarter(null, "Retiro","44293778034", "Pelegrini 1500", "sederetirotl@gmail.com", "+5491129387029", "25% de reintegro", 0.25, "-60% descuento", 0.6);
 
             headquarterRepository.save(headquarter1); 
 			headquarterRepository.save(headquarter2);
@@ -747,9 +745,9 @@ public class Controlador {
 	public void inicializarCursos() throws Exception {
 		try{	
 
-            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>());
-            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>());
-            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>());
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new ArrayList<>());
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new ArrayList<>());
+            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new ArrayList<>());
           
             courseRepository.save(course1); 
 			courseRepository.save(cours2);
@@ -802,7 +800,7 @@ public class Controlador {
 
 	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public CourseSchedule saveCronograma(Long courseId, Long sedeId, CourseSchedule schedule) throws Exception {
+	public CourseSchedule saveCronograma(long courseId, Long sedeId, CourseSchedule schedule) throws Exception {
       try{
 		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
         schedule.setCourse(course);
@@ -811,14 +809,6 @@ public class Controlador {
 		List<Headquarter> listaSedesDeCurso = course.getSedes();
 		if(listaSedesDeCurso.contains(sedeSeleccionada))
 		schedule.setSede(sedeSeleccionada);
-
-		List<CourseSchedule> cronogramas = new ArrayList<>();
-		List<CourseSchedule> existeListaCronogramas = course.getCronogramas();
-		if( existeListaCronogramas == null){
-			cronogramas.add(schedule);
-			course.setCronogramas(cronogramas);
-		} else existeListaCronogramas.add(schedule);
-		courseRepository.save(course);
 
 		CourseSchedule schedulecreated = courseSchedRepository.save(schedule);   
         return schedulecreated;

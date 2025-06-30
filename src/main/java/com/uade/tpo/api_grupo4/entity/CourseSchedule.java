@@ -40,9 +40,7 @@ public class CourseSchedule implements Serializable {
     private String instructor;
     private int vacancy;
     private int diaEnQueSeDicta;
-    @OneToMany(mappedBy = "courseSchedule", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonManagedReference
-    private List<Inscripcion> inscripciones;
+   
     @ManyToOne
     @JoinColumn(name = "headquarter_id")
     private Headquarter sede;
@@ -55,7 +53,6 @@ public class CourseSchedule implements Serializable {
                 this.instructor,
                 this.vacancy,
                 this.diaEnQueSeDicta,
-                this.inscripciones,
                 this.sede);
     }
 }

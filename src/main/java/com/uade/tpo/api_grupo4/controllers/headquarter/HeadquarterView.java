@@ -22,8 +22,7 @@ public class HeadquarterView {
     private Double courseBonus;	
     private String typeOfPromo;	
     private Double coursePromo;
-    @JsonIgnore
-    private List<Course> cursos;
+ 
     public Headquarter toEntity(){
         return new Headquarter(
             this.id,
@@ -35,8 +34,7 @@ public class HeadquarterView {
             this.typeOfBonus,
             this.courseBonus,
             this.typeOfPromo,
-            this.coursePromo,
-            this.cursos
+            this.coursePromo
            
         );
     }

@@ -28,8 +28,6 @@ public class CourseView {
     @JsonIgnore
     private List<Headquarter> sedes;
     
-    @JsonIgnore
-    private List<CourseSchedule> cronogramas;
 
    
 
@@ -44,8 +42,8 @@ public class CourseView {
             this.mode,
             this.fechaInicio,
             this.fechaFin, 
-            this.sedes,
-            this.cronogramas
+            this.sedes
+    
         );
     }
 }

@@ -49,10 +49,6 @@ public class Course {
     joinColumns = @JoinColumn(name = "course"), 
     inverseJoinColumns = @JoinColumn(name = "headquarter_id"))
     private List<Headquarter> sedes;
-    
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-   
-    private List<CourseSchedule> cronogramas;
 
     public CourseView toView(){
         return new CourseView(
@@ -65,8 +61,8 @@ public class Course {
             this.mode,
             this.fechaInicio,
             this.fechaFin, 
-            this.sedes,
-            this.cronogramas
+            this.sedes
+      
         );
     }
 
