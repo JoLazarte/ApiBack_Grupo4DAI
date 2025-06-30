@@ -18,11 +18,13 @@ public class CourseScheduleView {
     
     private Long id;
     private Course course;
-    private int vacancy;
+ 
     private String horaInicio;
     private String horaFin;
-    private int diaEnQueSeDicta;
+    
     private String instructor;
+    private int vacancy;
+    private int diaEnQueSeDicta;
     
     public CourseSchedule toEntity() {
         return new CourseSchedule(

@@ -116,15 +116,5 @@ public class ApiHeadquarter {
         }
     }
 
-    @GetMapping("/with-courses")
-    public ResponseEntity<List<HeadquarterView>> getHeadquartersWithCourses() {
-        try {
-            List<HeadquarterView> headquarters = controlador.findHeadquartersWithCourses();
-            return ResponseEntity.ok(headquarters);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     
 }

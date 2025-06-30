@@ -43,17 +43,17 @@ public class CourseSchedule implements Serializable {
     @Column(name = "hora_fin", nullable = false)
     private String horaFin;
     private String instructor;
-    private int diaEnQueSeDicta;
     private int vacancy;
+    private int diaEnQueSeDicta;
 
     public CourseScheduleView toView() {
         return new CourseScheduleView(
                 this.id,
                 this.course,
-                this.diaEnQueSeDicta,
-                this.horaFin,
                 this.horaInicio,
+                this.horaFin,
+                this.instructor,
                 this.vacancy,
-                this.instructor);
+                this.diaEnQueSeDicta);
     }
 }

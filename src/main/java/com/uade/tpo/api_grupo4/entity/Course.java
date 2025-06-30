@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -42,9 +43,12 @@ public class Course {
     private CourseMode mode;
     private String fechaInicio;
     private String fechaFin;
-    @ManyToOne
-    @JoinColumn(name = "headquarter_id", nullable = false)
-    private Headquarter sede;
+    @ManyToMany
+    @JoinTable(
+    name = "headquarter_curso", 
+    joinColumns = @JoinColumn(name = "course"), 
+    inverseJoinColumns = @JoinColumn(name = "headquarter_id"))
+    private List<Headquarter> sedes;
     
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
    
@@ -65,7 +69,7 @@ public class Course {
             this.mode,
             this.fechaInicio,
             this.fechaFin, 
-            this.sede,
+            this.sedes,
             this.cronogramas,
             this.inscripciones
         );

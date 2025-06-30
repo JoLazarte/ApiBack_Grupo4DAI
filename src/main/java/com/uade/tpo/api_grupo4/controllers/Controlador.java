@@ -531,7 +531,9 @@ public class Controlador {
 	}
 
 	public Course createCourse(Course course) throws Exception {
+
           try {
+			
 			Course createdCourse = courseRepository.save(course);
             return createdCourse;
           } catch (Exception error) {
@@ -542,11 +544,12 @@ public class Controlador {
 	public void inicializarCursos() throws Exception {
 		try{	
 
-            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+		
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
-            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
          
-            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new Headquarter(), new ArrayList<>(), new ArrayList<>());
+            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
            
 
             courseRepository.save(course1); 
@@ -583,14 +586,6 @@ public class Controlador {
             throw new Exception("[Controlador.deleteCourse] -> " + error.getMessage());
           }
     }
-
-
-	public List<CourseView> findByHeadquarter(Long sedeId) {
-        return courseRepository.findBySedeId(sedeId)
-                .stream()
-                .map(Course::toView)
-                .collect(Collectors.toList());
-    }
     
     public List<CourseView> findByMode(CourseMode mode) {
         return courseRepository.findByMode(mode)
@@ -607,38 +602,7 @@ public class Controlador {
     }
 
 	//----------------------------------Inscripciones----------------------------------------------------------//
-	@Transactional
-    public InscripcionView enrollStudent(Long studentId, Long courseId) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
-        
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
-        
-        // Verificar que el estudiante no esté ya inscripto en el curso
-        Optional<Inscripcion> existingInscription = inscripcionRepository
-                .findByStudentAndCourse(student, course);
-        
-        if (existingInscription.isPresent() && 
-            "ACTIVA".equals(existingInscription.get().getEstado())) {
-            throw new IllegalArgumentException("El estudiante ya está inscripto en este curso");
-        }
-        
-        // Verificar disponibilidad de cupos
-        Long activeEnrollments = inscripcionRepository.countActiveByCourse(courseId);
-        // Aquí podrías agregar lógica para verificar cupos disponibles basado en cronogramas
-        
-        Inscripcion inscripcion = Inscripcion.builder()
-                .student(student)
-                .course(course)
-                .fechaInscripcion(LocalDateTime.now())
-                .estado("ACTIVA")
-                .build();
-        
-        Inscripcion savedInscripcion = inscripcionRepository.save(inscripcion);
-        return mapToView(savedInscripcion);
-    }
-    
+	
     @Transactional
     public Optional<InscripcionView> cancelEnrollment(Long inscripcionId) {
         return inscripcionRepository.findById(inscripcionId)
@@ -675,9 +639,11 @@ public class Controlador {
 		return sedeSeleccionada;
 	}
 
-	public CourseSchedule saveCronograma(CourseSchedule schedule) throws Exception {
+	public CourseSchedule saveCronograma(Long courseId, CourseSchedule schedule) throws Exception {
       try{
-        CourseSchedule schedulecreated = courseSchedRepository.save(schedule);   
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
+        schedule.setCourse(course);
+		CourseSchedule schedulecreated = courseSchedRepository.save(schedule);   
         return schedulecreated;
 
 		} catch (Exception error) {
@@ -792,12 +758,7 @@ public class Controlador {
           }
     }
 
-	public List<HeadquarterView> findHeadquartersWithCourses() {
-        return headquarterRepository.findHeadquartersWithCourses()
-                .stream()
-                .map(Headquarter::toView)
-                .collect(Collectors.toList());
-    }
+	
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	

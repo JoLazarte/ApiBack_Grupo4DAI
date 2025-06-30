@@ -34,14 +34,14 @@ public class ApiCourseSchedule {
     }
 
 
-    @PostMapping("/createCourseSchedule")
-    public ResponseEntity<ResponseData<?>> createSchedule(@RequestBody CourseScheduleView scheduleView) {
+    @PostMapping("/createCourseSchedule/{courseId}")
+    public ResponseEntity<ResponseData<?>> createSchedule(@PathVariable Long courseId, @RequestBody CourseScheduleView scheduleView) {
          try {
             scheduleView.setId(null);
 
             CourseSchedule courseSched = scheduleView.toEntity();
 
-            CourseSchedule createdCourseSched = controlador.saveCronograma(courseSched);
+            CourseSchedule createdCourseSched = controlador.saveCronograma(courseId, courseSched);
 
             CourseScheduleView createdCourseSchedView = createdCourseSched.toView();
 

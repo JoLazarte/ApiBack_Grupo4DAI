@@ -113,16 +113,6 @@ public class ApiCourse {
         }
     }
 
-    @GetMapping("/by-headquarters/{sedeId}")
-    public ResponseEntity<List<CourseView>> getCoursesByHeadquarter(@PathVariable Long sedeId) {
-        try {
-            List<CourseView> courses = controlador.findByHeadquarter(sedeId);
-            return ResponseEntity.ok(courses);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     @GetMapping("/by-mode/{mode}")
     public ResponseEntity<List<CourseView>> getCoursesByMode(@PathVariable CourseMode mode) {
         try {

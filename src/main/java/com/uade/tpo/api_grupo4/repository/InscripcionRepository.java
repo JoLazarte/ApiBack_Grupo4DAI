@@ -24,9 +24,4 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     @Query("SELECT i FROM Inscripcion i WHERE i.student.id = :studentId AND i.estado = 'ACTIVA'")
     List<Inscripcion> findActiveInscriptionsByStudent(@Param("studentId") Long studentId);
     
-    @Query("SELECT i FROM Inscripcion i WHERE i.course.sede.id = :sedeId")
-    List<Inscripcion> findInscriptionsByHeadquarter(@Param("sedeId") Long sedeId);
-    
-    @Query("SELECT COUNT(i) FROM Inscripcion i WHERE i.course.id = :courseId AND i.estado = 'ACTIVA'")
-    Long countActiveByCourse(@Param("courseId") Long courseId);
 }

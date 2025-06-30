@@ -26,17 +26,7 @@ public class ApiInscripcion {
         this.controlador = controlador;
     }
 
-    @PostMapping("/enroll")
-    public ResponseEntity<InscripcionView> enrollStudent(@RequestParam Long studentId, @RequestParam Long courseId) {
-        try {
-            InscripcionView inscription = controlador.enrollStudent(studentId, courseId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(inscription);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+    
     
     @PutMapping("/{id}/cancel")
     public ResponseEntity<InscripcionView> cancelEnrollment(@PathVariable Long id) {
