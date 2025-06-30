@@ -1,9 +1,6 @@
 package com.uade.tpo.api_grupo4.entity;
-
 import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.*; // Importa todo de jakarta.persistence
 import lombok.*;
 

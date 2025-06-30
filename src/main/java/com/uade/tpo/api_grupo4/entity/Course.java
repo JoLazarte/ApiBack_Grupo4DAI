@@ -54,10 +54,6 @@ public class Course {
    
     private List<CourseSchedule> cronogramas;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonManagedReference
-    private List<Inscripcion> inscripciones;
-
     public CourseView toView(){
         return new CourseView(
             this.id,
@@ -70,8 +66,7 @@ public class Course {
             this.fechaInicio,
             this.fechaFin, 
             this.sedes,
-            this.cronogramas,
-            this.inscripciones
+            this.cronogramas
         );
     }
 

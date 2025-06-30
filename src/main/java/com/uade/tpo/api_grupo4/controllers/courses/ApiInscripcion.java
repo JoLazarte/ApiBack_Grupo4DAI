@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,11 +27,10 @@ public class ApiInscripcion {
         this.controlador = controlador;
     }
 
-    @PostMapping("/enroll")
-    public ResponseEntity<InscripcionView> enrollStudent(@RequestParam Long studentId, 
-                                                       @RequestParam Long courseId) {
+    @PostMapping("/enroll/{studentId}/{scheduleId}")
+    public ResponseEntity<InscripcionView> enrollStudent(@PathVariable(value = "studentId", required = false) Long studentId, @PathVariable(value = "scheduleId") Long scheduleId) {
         try {
-            InscripcionView inscription = controlador.enrollStudent(studentId, courseId);
+            InscripcionView inscription = controlador.enrollStudent(studentId, scheduleId);
             return ResponseEntity.status(HttpStatus.CREATED).body(inscription);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

@@ -28,8 +28,8 @@ public class Review {
     @NotNull
     @ManyToOne
     @JoinColumn(nullable = false, name = "user_id")
-    @JsonBackReference
-    private User user;
+    @JsonBackReference("review-author")
+    private Person user;
     @NotNull
     private int rating;
     @NotNull

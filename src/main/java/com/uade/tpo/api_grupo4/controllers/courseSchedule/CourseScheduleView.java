@@ -1,11 +1,13 @@
 package com.uade.tpo.api_grupo4.controllers.courseSchedule;
 
 import java.time.LocalTime;
+import java.util.List;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
-
+import com.uade.tpo.api_grupo4.entity.Headquarter;
+import com.uade.tpo.api_grupo4.entity.Inscripcion;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +27,9 @@ public class CourseScheduleView {
     private String instructor;
     private int vacancy;
     private int diaEnQueSeDicta;
-    
+     @JsonIgnore
+    private List<Inscripcion> inscripciones;
+    private Headquarter sede;
     public CourseSchedule toEntity() {
         return new CourseSchedule(
                 this.id,
@@ -34,7 +38,9 @@ public class CourseScheduleView {
                 this.horaFin,
                 this.instructor,
                 this.vacancy,
-                this.diaEnQueSeDicta
+                this.diaEnQueSeDicta,
+                this.inscripciones,
+                this.sede
                 );
     }
 }

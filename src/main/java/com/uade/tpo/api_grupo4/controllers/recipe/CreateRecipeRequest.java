@@ -7,6 +7,7 @@ import java.util.List;
 public class CreateRecipeRequest {
     private String recipeName;
     private String mainPicture;
+    private String descriptionGeneral;
     private int servings;
     private int cantidadPersonas;
     private Long typeOfRecipeId;

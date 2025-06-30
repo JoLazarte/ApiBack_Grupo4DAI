@@ -34,8 +34,12 @@ public class JwtService {
      */
     public String generateToken(Person person) {
         Map<String, Object> extraClaims = new HashMap<>();
-        // Opcional: Podemos añadir datos útiles al token si queremos en el futuro.
+        
+        // ▼▼▼ AÑADIMOS TODOS LOS DATOS QUE NECESITA EL FRONTEND ▼▼▼
         extraClaims.put("userId", person.getId());
+        extraClaims.put("firstName", person.getFirstName());
+        extraClaims.put("lastName", person.getLastName());
+        extraClaims.put("permissionGranted", person.getPermissionGranted());
         extraClaims.put("isStudent", person instanceof Student);
 
         return Jwts.builder()

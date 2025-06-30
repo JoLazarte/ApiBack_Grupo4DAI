@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import com.uade.tpo.api_grupo4.controllers.Controlador;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
+import com.uade.tpo.api_grupo4.entity.Person;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.User;
 import com.uade.tpo.api_grupo4.exceptions.StudentException;
@@ -18,6 +20,7 @@ import com.uade.tpo.api_grupo4.exceptions.UserException;
 import com.uade.tpo.api_grupo4.controllers.person.VerificationRequest;
 
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
+import com.uade.tpo.api_grupo4.controllers.user.BecomeStudentRequest;
 
 @RestController
 @RequestMapping("/apiUser")
@@ -106,15 +109,28 @@ public class ApiUser {
         }
     }
 
-    @PostMapping("/toStudent")
-    public ResponseEntity<String> cambiarAEstudiante(@PathVariable Long userId, @RequestBody Student student) {
+    // ▼▼▼ ENDPOINT CORREGIDO Y ACTUALIZADO ▼▼▼
+    /**
+     * Endpoint para que un usuario autenticado se convierta en estudiante.
+     * La identidad del usuario se toma del token de seguridad, no de la URL.
+     * @param request El DTO con los datos adicionales de estudiante.
+     * @param authentication Objeto de seguridad inyectado por Spring, contiene los datos del usuario logueado.
+     * @return El nuevo objeto Student si la operación es exitosa.
+     */
+    @PostMapping("/become-student")
+    public ResponseEntity<?> becomeStudent(@RequestBody BecomeStudentRequest request, Authentication authentication) {
         try {
-            controlador.cambiarAEstudiante(userId, student);
-            return ResponseEntity.ok("Usuario de id: " + userId + " cambiando a Estudiante con éxito.");
-        } catch (StudentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            // Obtenemos la persona autenticada (que debería ser un User) desde el token
+            Person person = (Person) authentication.getPrincipal();
+            
+            // Llamamos al nuevo y correcto método del servicio
+            Student student = controlador.upgradeUserToStudent(person, request);
+            
+            // Devolvemos el nuevo objeto Student como confirmación
+            return new ResponseEntity<>(student, HttpStatus.OK);
+            
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
       

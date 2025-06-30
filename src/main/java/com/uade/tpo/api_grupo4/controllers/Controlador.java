@@ -7,10 +7,12 @@ import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
 import com.uade.tpo.api_grupo4.controllers.recipe.CreateRecipeRequest;
+import com.uade.tpo.api_grupo4.controllers.recipe.CreateReviewRequest;
 import com.uade.tpo.api_grupo4.controllers.recipe.CreateTypeRequest;
 import com.uade.tpo.api_grupo4.controllers.recipe.CreateUnitRequest;
 import com.uade.tpo.api_grupo4.controllers.recipe.MaterialRequestDTO;
 import com.uade.tpo.api_grupo4.controllers.recipe.StepRequestDTO;
+import com.uade.tpo.api_grupo4.controllers.user.BecomeStudentRequest;
 import com.uade.tpo.api_grupo4.entity.Course;
 import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
@@ -21,6 +23,7 @@ import com.uade.tpo.api_grupo4.entity.MaterialUsed;
 import com.uade.tpo.api_grupo4.entity.PendingUser;
 import com.uade.tpo.api_grupo4.entity.Person;
 import com.uade.tpo.api_grupo4.entity.Recipe;
+import com.uade.tpo.api_grupo4.entity.Review;
 import com.uade.tpo.api_grupo4.entity.Step;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.TypeOfRecipe;
@@ -35,11 +38,12 @@ import com.uade.tpo.api_grupo4.repository.CourseAttendRepository;
 import com.uade.tpo.api_grupo4.repository.CourseRepository;
 import com.uade.tpo.api_grupo4.repository.CourseScheduleRepository;
 import com.uade.tpo.api_grupo4.repository.HeadquarterRepository;
-import com.uade.tpo.api_grupo4.repository.IngredientRepository;
 import com.uade.tpo.api_grupo4.repository.InscripcionRepository;
+import com.uade.tpo.api_grupo4.repository.IngredientRepository;
 import com.uade.tpo.api_grupo4.repository.MaterialUsedRepository;
 import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
+import com.uade.tpo.api_grupo4.repository.ReviewRepository;
 import com.uade.tpo.api_grupo4.repository.StepRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.TypeOfRecipeRepository;
@@ -48,12 +52,20 @@ import com.uade.tpo.api_grupo4.repository.UserRepository;
 import com.uade.tpo.api_grupo4.service.EmailService;
 import com.uade.tpo.api_grupo4.service.JwtService;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,11 +90,14 @@ public class Controlador {
 	private final IngredientRepository ingredientRepository;
 	private final TypeOfRecipeRepository typeOfRecipeRepository;
 	private final StepRepository stepRepository;
+	private final ReviewRepository reviewRepository;
 	private final JwtService jwtService;
 	private final AuthenticationManager authenticationManager;
 	private final PendingUserRepository pendingUserRepository;
 	private final EmailService emailService;
 
+	@PersistenceContext
+    private EntityManager entityManager;
 	//-----------------------------------------------Metodos Publicos--------------------------------------------------------------------------------------------------------------------------------------------------------
 	public boolean aliasExists(String alias) {
 		return userRepository.existsByUsername(alias) || studentRepository.existsByUsername(alias);
@@ -119,6 +134,7 @@ public class Controlador {
 	}
 
 	//--------Registro--------
+
 	public void crearUsuarioGeneral(RegisterRequest request) throws UserException {
 		if (userRepository.existsByUsername(request.getUsername()) || studentRepository.existsByUsername(request.getUsername())) {
 			throw new UserException("El nombre de usuario '" + request.getUsername() + "' ya está en uso.");
@@ -307,30 +323,46 @@ public class Controlador {
 		System.out.println("Usuario eliminado: " + userId);
 	}
 
-	public Student cambiarAEstudiante(Long id, Student student) throws Exception {
-		User usuarioACambiar = userRepository.findById(id)
-				.orElseThrow(() -> new UserException("No existe el usuario con el id " + id));
+	@Transactional
+    public Student upgradeUserToStudent(Person person, BecomeStudentRequest request) throws Exception {
+        // Verificamos que la persona que hace la petición sea realmente un User
+        if (!(person instanceof User)) {
+            throw new Exception("La operación no es válida: la cuenta ya es de un estudiante.");
+        }
+        
+        Long personId = person.getId();
 
-		Student nuevoEstudiante = Student.builder()
-				.username(usuarioACambiar.getUsername())
-				.email(usuarioACambiar.getEmail())
-				.password(usuarioACambiar.getPassword())
-				.permissionGranted(false)
-				.courses(new ArrayList<>())
-				.cardNumber(student.getCardNumber())
-				.dniFrente(student.getDniFrente())
-				.dniDorso(student.getDniDorso())
-				.nroTramite(student.getNroTramite())
-				.cuentaCorriente(student.getCuentaCorriente())
-				.tipoTarjeta(student.getTipoTarjeta())
-				.nroDocumento(student.getNroDocumento())
-				.build();
+        // 1. Eliminamos la fila de la tabla 'user' usando una consulta SQL nativa.
+        entityManager.createNativeQuery("DELETE FROM user WHERE id = :personId")
+                .setParameter("personId", personId)
+                .executeUpdate();
 
-		studentRepository.save(nuevoEstudiante);
-		System.out.println("Estudiante agregado: " + nuevoEstudiante.getId());
-		eliminarUsuario(id);
-		return nuevoEstudiante;
-	}
+        // 2. Insertamos la nueva fila en la tabla 'student' con los datos correspondientes.
+        entityManager.createNativeQuery("INSERT INTO student (id, card_number, dni_frente, dni_dorso, nro_tramite, cuenta_corriente, nro_documento, tipo_tarjeta) VALUES (:id, :cardNumber, :dniFrente, :dniDorso, :nroTramite, :cuentaCorriente, :nroDocumento, :tipoTarjeta)")
+                .setParameter("id", personId)
+                .setParameter("cardNumber", request.getCardNumber())
+                .setParameter("dniFrente", request.getDniFrente())
+                .setParameter("dniDorso", request.getDniDorso())
+                .setParameter("nroTramite", request.getNroTramite())
+                .setParameter("cuentaCorriente", 0)
+                .setParameter("nroDocumento", request.getNroDocumento())
+                .setParameter("tipoTarjeta", request.getTipoTarjeta())
+                .executeUpdate();
+        
+        // ▼▼▼ ¡CAMBIO CLAVE! ▼▼▼
+        // 3. Actualizamos el flag 'permissionGranted' directamente en la tabla 'person'.
+        entityManager.createNativeQuery("UPDATE person SET permission_granted = false WHERE id = :personId")
+                .setParameter("personId", personId)
+                .executeUpdate();
+
+        // 4. Forzamos la ejecución de las consultas y limpiamos la caché de la sesión.
+        entityManager.flush();
+        entityManager.clear();
+        
+        // 5. Devolvemos el objeto Student recién constituido, buscándolo de nuevo para asegurar que refleje el estado final.
+        return studentRepository.findById(personId)
+                .orElseThrow(() -> new Exception("Error crítico al reconvertir el usuario a estudiante."));
+    }
 
 	public void modificarPasswordUsuario(Long userId, String newPassword) throws UserException {
 		User usuario = userRepository.findById(userId).orElseThrow(() -> new UserException("El usuario con id " + userId + " no existe."));
@@ -365,6 +397,7 @@ public class Controlador {
     }
 
 	//--------Materiales usados--------
+
 	public MaterialUsed addMaterialToRecipe(Long recipeId, MaterialRequestDTO materialRequest) throws Exception {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new Exception("No se encontró la receta con ID: " + recipeId));
@@ -391,28 +424,25 @@ public class Controlador {
 
 	//--------Crear Tipo de receta--------
 	public TypeOfRecipe createTypeOfRecipe(CreateTypeRequest request) throws Exception {
-		// Normalizamos el nombre para evitar espacios extra
 		String typeName = request.getName().trim();
 
-		// Verificamos si ya existe usando el método que creamos en el repositorio
 		if (typeOfRecipeRepository.findByNameIgnoreCase(typeName).isPresent()) {
 			throw new Exception("El tipo de receta '" + typeName + "' ya existe.");
 		}
 
-		// Si no existe, creamos el nuevo objeto
 		TypeOfRecipe newType = TypeOfRecipe.builder()
 				.name(typeName)
 				.build();
 
-		// Guardamos y devolvemos el nuevo tipo
 		return typeOfRecipeRepository.save(newType);
 	}
 
+
 	//--------Crear Tipo de unidad--------
+
 	public Unit createUnit(CreateUnitRequest request) throws Exception {
 		String unitDescription = request.getDescription().trim();
 
-		// Verificamos si ya existe para evitar duplicados
 		if (unitRepository.findByDescriptionIgnoreCase(unitDescription).isPresent()) {
 			throw new Exception("La unidad '" + unitDescription + "' ya existe.");
 		}
@@ -425,39 +455,35 @@ public class Controlador {
 	}
 
 	//--------Crear receta--------
+
 	@Transactional
 	public Recipe createRecipeWithMaterials(CreateRecipeRequest request, Person author) throws Exception {
 		
-		// 1. Buscamos las entidades relacionadas que son obligatorias, como el tipo de receta.
 		TypeOfRecipe typeOfRecipe = typeOfRecipeRepository.findById(request.getTypeOfRecipeId())
 				.orElseThrow(() -> new Exception("Tipo de receta no encontrado con ID: " + request.getTypeOfRecipeId()));
 
-		// 2. Creamos el objeto principal de la Receta con sus datos básicos.
 		Recipe newRecipe = Recipe.builder()
 				.recipeName(request.getRecipeName())
-				.user(author) // Se asocia al usuario autenticado que la crea
+				.user(author)
 				.mainPicture(request.getMainPicture())
 				.servings(request.getServings())
 				.comensales(request.getCantidadPersonas())
 				.typeOfRecipe(typeOfRecipe)
-				.ingredients(new ArrayList<>()) // Inicializamos las listas para evitar errores
+				.ingredients(new ArrayList<>())
 				.description(new ArrayList<>())
 				.reviews(new ArrayList<>())
+				.descriptionGeneral(request.getDescriptionGeneral())
 				.build();
 
-		// 3. Procesamos la lista de Materiales (Ingredientes)
 		if (request.getIngredients() != null) {
 			for (MaterialRequestDTO materialDto : request.getIngredients()) {
 				
 				Ingredient ingredientToUse;
 
-				// Lógica de Prioridades para Ingredientes:
-				// Prioridad 1: Usar el ID del ingrediente si se proporciona.
 				if (materialDto.getIngredientId() != null) {
 					ingredientToUse = ingredientRepository.findById(materialDto.getIngredientId())
 							.orElseThrow(() -> new Exception("Ingrediente no encontrado con el ID proporcionado: " + materialDto.getIngredientId()));
 				
-				// Prioridad 2: Si no hay ID, usar el nombre del ingrediente (Buscar o Crear).
 				} else if (materialDto.getIngredientName() != null && !materialDto.getIngredientName().trim().isEmpty()) {
 					String ingredientName = materialDto.getIngredientName().trim().toLowerCase();
 					
@@ -467,16 +493,13 @@ public class Controlador {
 								return ingredientRepository.save(newIngredient);
 							});
 
-				// Error: Si no se proporciona ni ID ni nombre.
 				} else {
 					throw new Exception("Se debe proporcionar 'ingredientId' o 'ingredientName' para cada material.");
 				}
 
-				// Buscamos la unidad (es opcional)
 				Unit unit = materialDto.getUnitId() != null ? unitRepository.findById(materialDto.getUnitId())
 						.orElseThrow(() -> new Exception("Unidad no encontrada con ID: " + materialDto.getUnitId())) : null;
 
-				// Creamos el objeto MaterialUsed y lo añadimos a la lista de la receta
 				MaterialUsed material = MaterialUsed.builder()
 						.recipe(newRecipe)
 						.ingredient(ingredientToUse)
@@ -488,7 +511,6 @@ public class Controlador {
 			}
 		}
 		
-		// 4. Procesamos la lista de Pasos
 		if (request.getSteps() != null) {
 			for (StepRequestDTO stepDto : request.getSteps()) {
 				Step step = Step.builder()
@@ -502,217 +524,104 @@ public class Controlador {
 			}
 		}
 
-		// 5. Guardamos la Receta principal en la base de datos.
-		// Gracias a la configuración de 'cascade', JPA guardará automáticamente todos los
-		// objetos MaterialUsed y Step que asociamos a esta receta.
 		return recipeRepository.save(newRecipe);
 	}
-	//-----------------------------------------------Courses--------------------------------------------------------------------------------------------------------------------------------------------------------
+		
+	//--------Review--------
+	public Review createReview(Long recipeId, CreateReviewRequest request, Person author) throws Exception {
+		Recipe recipe = recipeRepository.findById(recipeId)
+				.orElseThrow(() -> new Exception("No se encontró la receta con ID: " + recipeId));
 
-	public List<Course> todosLosCursos() throws CourseException {
-			List<Course> cursos = courseRepository.findAll();
-			if (cursos.isEmpty()) {
-				throw new CourseException("No se encontraron cursos en la base de datos.");
-			}
-			return cursos;
+		Review newReview = Review.builder()
+				.recipe(recipe)
+				.user(author)
+				.rating(request.getRating())
+				.comment(request.getComment())
+				.build();
+
+		return reviewRepository.save(newReview);
 	}
 
-	public Course getCourseById(Long courseId) throws Exception {
-		try{
-			return courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
-		} catch (CourseException error) {
-			throw new CourseException(error.getMessage());
-		} catch (Exception error) {
-			throw new Exception("[Controlador.getCourseByName] -> " + error.getMessage());
+	//-----------------------------------------------Busquedas--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	//--------Todas las recetas--------
+	public Page<Recipe> findAllRecipes(String sortOrder, int page, int size) {
+		Sort sort;
+		switch (sortOrder.toLowerCase()) {
+			case "newest":
+				sort = Sort.by("id").descending();
+				break;
+			case "oldest":
+				sort = Sort.by("id").ascending();
+				break;
+			case "alpha_asc":
+			default:
+				sort = Sort.by("recipeName").ascending();
+				break;
+		}
+
+		Pageable pageable = PageRequest.of(page, size, sort);
+
+		return recipeRepository.findAll(pageable);
+	}
+
+	private Pageable createPageable(String sortOrder, int page, int size) {
+        Sort sort;
+        switch (sortOrder.toLowerCase()) {
+            case "newest":
+                sort = Sort.by("id").descending();
+                break;
+            case "oldest":
+                sort = Sort.by("id").ascending();
+                break;
+            case "alpha_asc":
+            default:
+                sort = Sort.by("recipeName").ascending();
+                break;
+        }
+        return PageRequest.of(page, size, sort);
+    }
+
+	//--------Todas las unidades--------
+	public List<Unit> findAllUnits() {
+        return unitRepository.findAll(Sort.by("description").ascending());
+    }
+
+	//--------Recetas por nombre--------
+	public Page<Recipe> findRecipesByName(String name, String sortOrder, int page, int size) {
+        Pageable pageable = createPageable(sortOrder, page, size);
+        return recipeRepository.findByRecipeNameContainingIgnoreCase(name, pageable);
+    }
+
+	//--------Recetas por nombre de usuario--------
+	public Page<Recipe> findRecipesByAuthor(String authorUsername, String sortOrder, int page, int size) {
+        Pageable pageable = createPageable(sortOrder, page, size);
+        return recipeRepository.findByUserUsernameContainingIgnoreCase(authorUsername, pageable);
+    }
+
+	//--------Recetas por tipo--------
+	public Page<Recipe> findRecipesByType(Long typeId, String sortOrder, int page, int size) {
+        Pageable pageable = createPageable(sortOrder, page, size);
+        
+        return recipeRepository.findByTypeOfRecipeId(typeId, pageable);
+    }
+
+	//--------Todas los tipos de recetas--------
+	public List<TypeOfRecipe> findAllTypes() {
+		return typeOfRecipeRepository.findAll(Sort.by("name").ascending());
+	}
+
+	//--------Recetas por ingrediente o NO ingrediente--------
+	public Page<Recipe> findRecipesByIngredientPresence(String ingredientName, boolean contains, String sortOrder, int page, int size) {
+		Pageable pageable = createPageable(sortOrder, page, size);
+		
+		if (contains) {
+			return recipeRepository.findRecipesWithIngredient(ingredientName, pageable);
+		} else {
+			return recipeRepository.findRecipesWithoutIngredient(ingredientName, pageable);
 		}
 	}
 
-	public Course createCourse(Course course) throws Exception {
-
-          try {
-			
-			Course createdCourse = courseRepository.save(course);
-            return createdCourse;
-          } catch (Exception error) {
-            throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
-          }
-        }
-
-	public void inicializarCursos() throws Exception {
-		try{	
-
-            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-          
-            courseRepository.save(course1); 
-			courseRepository.save(cours2);
-			courseRepository.save(course3);
-
-		 } catch (CourseException error) {
-
-        	throw new CourseException(error.getMessage());
-      } catch (Exception error) {
-				throw new Exception("[Controlador.inicializarCursos] -> " + error.getMessage());
-			}
-    	}
-
-	public Course updateCourse(Course course) throws Exception {
-          try {
-            if (!courseRepository.existsById(course.getId())) 
-              throw new CourseException("El curso con id: '" + course.getId() + "' no existe.");
-            
-            Course updatedCourse = courseRepository.save(course);
-            return updatedCourse;
-          } catch (CourseException error) {
-            throw new CourseException(error.getMessage());
-          } catch (Exception error) {
-            throw new Exception("[Controlador.updateCourse] -> " + error.getMessage());
-          }
-    }
-
-	@Transactional
-    public void deleteCourse(Long id) throws Exception {
-          try {
-              courseRepository.deleteById(id);
-          } catch (Exception error) {
-            throw new Exception("[Controlador.deleteCourse] -> " + error.getMessage());
-          }
-    }
-    
-    public List<CourseView> findByMode(CourseMode mode) {
-        return courseRepository.findByMode(mode)
-                .stream()
-                .map(Course::toView)
-                .collect(Collectors.toList());
-    }
-    
-    public List<CourseView> findByName(String name) {
-        return courseRepository.findByNameContainingIgnoreCase(name)
-                .stream()
-                .map(Course::toView)
-                .collect(Collectors.toList());
-    }
-
-
-
-	//----------------------------------Inscripciones----------------------------------------------------------//
-	@Transactional
-    public InscripcionView enrollStudent(Long studentId, Long courseId) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
-        
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
-        
-        // Verificar que el estudiante no esté ya inscripto en el curso
-        Optional<Inscripcion> existingInscription = inscripcionRepository
-                .findByStudentAndCourse(student, course);
-        
-        if (existingInscription.isPresent() && 
-            "ACTIVA".equals(existingInscription.get().getEstado())) {
-            throw new IllegalArgumentException("El estudiante ya está inscripto en este curso");
-        }
-        
-        // Verificar disponibilidad de cupos
-        Long activeEnrollments = inscripcionRepository.countActiveByCourse(courseId);
-        // Aquí podrías agregar lógica para verificar cupos disponibles basado en cronogramas
-        
-        Inscripcion inscripcion = Inscripcion.builder()
-                .student(student)
-                .course(course)
-                .fechaInscripcion(LocalDateTime.now())
-                .estado("ACTIVA")
-                .build();
-        
-        Inscripcion savedInscripcion = inscripcionRepository.save(inscripcion);
-        return mapToView(savedInscripcion);
-    }
-    
-	
-	@Transactional
-    public Optional<InscripcionView> cancelEnrollment(Long inscripcionId) {
-        return inscripcionRepository.findById(inscripcionId)
-                .map(inscripcion -> {
-                    inscripcion.setEstado("CANCELADA");
-                    return mapToView(inscripcionRepository.save(inscripcion));
-                });
-    }
-    
-    public List<InscripcionView> findByStudent(Long studentId) {
-        return inscripcionRepository.findByStudentId(studentId)
-                .stream()
-                .map(this::mapToView)
-                .collect(Collectors.toList());
-    }
-
-	private InscripcionView mapToView(Inscripcion inscripcion) {
-        return new InscripcionView(
-                inscripcion.getId(),
-                inscripcion.getStudent(),
-                inscripcion.getCourse(),
-                inscripcion.getFechaInscripcion(),
-                inscripcion.getEstado(),
-                inscripcion.getAsistencias()
-        );
-    }
-
-
-
-	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
-	
-	public CourseSchedule saveCronograma(Long courseId, CourseSchedule schedule) throws Exception {
-      try{
-		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
-        schedule.setCourse(course);
-		List<CourseSchedule> cronogramas = new ArrayList<>();
-		List<CourseSchedule> existeListaCronogramas = course.getCronogramas();
-		if( existeListaCronogramas == null){
-			cronogramas.add(schedule);
-			course.setCronogramas(cronogramas);
-		} else existeListaCronogramas.add(schedule);
-		courseRepository.save(course);
-		CourseSchedule schedulecreated = courseSchedRepository.save(schedule);   
-        return schedulecreated;
-
-		} catch (Exception error) {
-            throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
-          }
-    }
-
-    public CourseSchedule updateCronograma(CourseSchedule courseSchedule) throws Exception {
-          try {
-            if (!courseSchedRepository.existsById(courseSchedule.getId())) 
-              throw new CourseScheduleException("El cronograma con id: '" + courseSchedule.getId() + "' no existe.");
-            
-            CourseSchedule updatedCourseSched = courseSchedRepository.save(courseSchedule);
-            return updatedCourseSched;
-          } catch (CourseScheduleException error) {
-            throw new CourseScheduleException(error.getMessage());
-          } catch (Exception error) {
-            throw new Exception("[Controlador.updateCourseSchedule] -> " + error.getMessage());
-          }
-    }
-    
-
-	@Transactional
-    public void deleteCourseSchedule(Long id) throws Exception {
-          try {
-              
-			  courseSchedRepository.findById(id).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + id + " no existe."));
-			  courseSchedRepository.deleteById(id);
-			
-          } catch (Exception error) {
-            throw new Exception("[Controlador.deleteCourseSchedule] -> " + error.getMessage());
-          }
-        }
-
-	public List<CourseScheduleView> findSchedByCourse(Long courseId) {
-        return courseSchedRepository.findByCourseId(courseId)
-                .stream()
-                .map(CourseSchedule::toView)
-                .collect(Collectors.toList());
-    	}
 
 	//-----------------------------------------------Headquarters--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -788,16 +697,233 @@ public class Controlador {
           }
     }
 
-	public Headquarter seleccionarSede(Long sedeId, Long courseId){
+	public void cargarSede(Long sedeId, Long courseId){
 		Headquarter sedeSeleccionada = headquarterRepository.findById(sedeId).orElseThrow(() -> new HeadquarterException("La sede con id " + sedeId + " no existe."));
 		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
 		
-		course.setSedes(List.of(sedeSeleccionada));
+		List<Headquarter> sedes = new ArrayList<>();
+		List<Headquarter> existeListaSedes = course.getSedes();
+		if( existeListaSedes == null){
+			sedes.add(sedeSeleccionada);
+			course.setSedes(sedes);
+		} else existeListaSedes.add(sedeSeleccionada);
+		courseRepository.save(course);
 		
 		courseRepository.save(course);
-		return sedeSeleccionada;
 	}
 	
+	//-----------------------------------------------Courses--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	public List<Course> todosLosCursos() throws CourseException {
+			List<Course> cursos = courseRepository.findAll();
+			if (cursos.isEmpty()) {
+				throw new CourseException("No se encontraron cursos en la base de datos.");
+			}
+			return cursos;
+	}
+
+	public Course getCourseById(Long courseId) throws Exception {
+		try{
+			return courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
+		} catch (CourseException error) {
+			throw new CourseException(error.getMessage());
+		} catch (Exception error) {
+			throw new Exception("[Controlador.getCourseByName] -> " + error.getMessage());
+		}
+	}
+
+	public Course createCourse(Course course) throws Exception {
+
+          try {
+			
+			Course createdCourse = courseRepository.save(course);
+            return createdCourse;
+          } catch (Exception error) {
+            throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
+          }
+        }
+
+	public void inicializarCursos() throws Exception {
+		try{	
+
+            Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>());
+            Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>());
+            Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>());
+          
+            courseRepository.save(course1); 
+			courseRepository.save(cours2);
+			courseRepository.save(course3);
+
+		 } catch (CourseException error) {
+
+        	throw new CourseException(error.getMessage());
+      } catch (Exception error) {
+				throw new Exception("[Controlador.inicializarCursos] -> " + error.getMessage());
+			}
+    	}
+
+	public Course updateCourse(Course course) throws Exception {
+          try {
+            if (!courseRepository.existsById(course.getId())) 
+              throw new CourseException("El curso con id: '" + course.getId() + "' no existe.");
+            
+            Course updatedCourse = courseRepository.save(course);
+            return updatedCourse;
+          } catch (CourseException error) {
+            throw new CourseException(error.getMessage());
+          } catch (Exception error) {
+            throw new Exception("[Controlador.updateCourse] -> " + error.getMessage());
+          }
+    }
+
+	@Transactional
+    public void deleteCourse(Long id) throws Exception {
+          try {
+              courseRepository.deleteById(id);
+          } catch (Exception error) {
+            throw new Exception("[Controlador.deleteCourse] -> " + error.getMessage());
+          }
+    }
+    
+    public List<CourseView> findByMode(CourseMode mode) {
+        return courseRepository.findByMode(mode)
+                .stream()
+                .map(Course::toView)
+                .collect(Collectors.toList());
+    }
+    
+    public List<CourseView> findByName(String name) {
+        return courseRepository.findByNameContainingIgnoreCase(name)
+                .stream()
+                .map(Course::toView)
+                .collect(Collectors.toList());
+    }
+
+	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	public CourseSchedule saveCronograma(Long courseId, Long sedeId, CourseSchedule schedule) throws Exception {
+      try{
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
+        schedule.setCourse(course);
+		Headquarter sedeSeleccionada = headquarterRepository.findById(sedeId).orElseThrow(() -> new HeadquarterException("Sede no encontrada"));
+		
+		List<Headquarter> listaSedesDeCurso = course.getSedes();
+		if(listaSedesDeCurso.contains(sedeSeleccionada))
+		schedule.setSede(sedeSeleccionada);
+
+		List<CourseSchedule> cronogramas = new ArrayList<>();
+		List<CourseSchedule> existeListaCronogramas = course.getCronogramas();
+		if( existeListaCronogramas == null){
+			cronogramas.add(schedule);
+			course.setCronogramas(cronogramas);
+		} else existeListaCronogramas.add(schedule);
+		courseRepository.save(course);
+
+		CourseSchedule schedulecreated = courseSchedRepository.save(schedule);   
+        return schedulecreated;
+
+		} catch (Exception error) {
+            throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
+          }
+    }
+
+    public CourseSchedule updateCronograma(CourseSchedule courseSchedule) throws Exception {
+          try {
+            if (!courseSchedRepository.existsById(courseSchedule.getId())) 
+              throw new CourseScheduleException("El cronograma con id: '" + courseSchedule.getId() + "' no existe.");
+            
+            CourseSchedule updatedCourseSched = courseSchedRepository.save(courseSchedule);
+            return updatedCourseSched;
+          } catch (CourseScheduleException error) {
+            throw new CourseScheduleException(error.getMessage());
+          } catch (Exception error) {
+            throw new Exception("[Controlador.updateCourseSchedule] -> " + error.getMessage());
+          }
+    }
+    
+
+	@Transactional
+    public void deleteCourseSchedule(Long id) throws Exception {
+          try {
+              
+			  courseSchedRepository.findById(id).orElseThrow(() -> new CourseScheduleException("El cronograma con id " + id + " no existe."));
+			  courseSchedRepository.deleteById(id);
+			
+          } catch (Exception error) {
+            throw new Exception("[Controlador.deleteCourseSchedule] -> " + error.getMessage());
+          }
+        }
+
+	public List<CourseScheduleView> findSchedByCourse(Long courseId) {
+        return courseSchedRepository.findByCourseId(courseId)
+                .stream()
+                .map(CourseSchedule::toView)
+                .collect(Collectors.toList());
+    	}
+
+	
+//----------------------------------Inscripciones----------------------------------------------------------//
+	@Transactional
+    public InscripcionView enrollStudent(Long studentId, Long courseScheduleId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+        
+        CourseSchedule courseSchedule = courseSchedRepository.findById(courseScheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("cronograma no encontrado"));
+        
+		
+        // Verificar que el estudiante no esté ya inscripto en el curso
+        Optional<Inscripcion> existingInscription = inscripcionRepository
+                .findByStudentAndCourseSchedule(student, courseSchedule);
+        
+        if (existingInscription.isPresent() && 
+            "ACTIVA".equals(existingInscription.get().getEstado())) {
+            throw new IllegalArgumentException("El estudiante ya está inscripto en este curso");
+        }
+        
+        // Verificar disponibilidad de cupos
+        Long activeEnrollments = inscripcionRepository.countActiveByCourseSchedule(courseScheduleId);
+        // Aquí podrías agregar lógica para verificar cupos disponibles basado en cronogramas
+        
+        Inscripcion inscripcion = Inscripcion.builder()
+                .student(student)
+                .course(courseSchedule)
+                .fechaInscripcion(LocalDateTime.now())
+                .estado("ACTIVA")
+                .build();
+		
+        Inscripcion savedInscripcion = inscripcionRepository.save(inscripcion);
+        return mapToView(savedInscripcion);
+    }
+    
+	
+	@Transactional
+    public Optional<InscripcionView> cancelEnrollment(Long inscripcionId) {
+        return inscripcionRepository.findById(inscripcionId)
+                .map(inscripcion -> {
+                    inscripcion.setEstado("CANCELADA");
+                    return mapToView(inscripcionRepository.save(inscripcion));
+                });
+    }
+    
+    public List<InscripcionView> findByStudent(Long studentId) {
+        return inscripcionRepository.findByStudentId(studentId)
+                .stream()
+                .map(this::mapToView)
+                .collect(Collectors.toList());
+    }
+
+	private InscripcionView mapToView(Inscripcion inscripcion) {
+        return new InscripcionView(
+                inscripcion.getId(),
+                inscripcion.getStudent(),
+                inscripcion.getCourse(),
+                inscripcion.getFechaInscripcion(),
+                inscripcion.getEstado(),
+                inscripcion.getAsistencias()
+        );
+    }
+
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------
 	

@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 //import jakarta.validation.constraints.NotEmpty;
@@ -39,6 +40,8 @@ public class Recipe {
     @JsonBackReference
     private Person user;
     private String recipeName;
+    @Column(columnDefinition = "LONGTEXT")
+    private String descriptionGeneral;
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Step> description;	

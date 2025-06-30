@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.uade.tpo.api_grupo4.entity.Course;
+import com.uade.tpo.api_grupo4.entity.CourseSchedule;
 import com.uade.tpo.api_grupo4.entity.Inscripcion;
 import com.uade.tpo.api_grupo4.entity.Student;
 
@@ -16,10 +17,10 @@ import com.uade.tpo.api_grupo4.entity.Student;
 public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> {
     List<Inscripcion> findByStudent(Student student);
     List<Inscripcion> findByStudentId(Long studentId);
-    List<Inscripcion> findByCourse(Course course);
-    List<Inscripcion> findByCourseId(Long courseId);
+    List<Inscripcion> findByCourseSchedule(CourseSchedule courseSchedule);
+    List<Inscripcion> findByCourseScheduleId(Long courseScheduleId);
     List<Inscripcion> findByEstado(String estado);
-    Optional<Inscripcion> findByStudentAndCourse(Student student, Course course);
-    @Query("SELECT COUNT(i) FROM Inscripcion i WHERE i.course.id = :courseId AND i.estado = 'ACTIVA'")
-    Long countActiveByCourse(@Param("courseId") Long courseId);
+    Optional<Inscripcion> findByStudentAndCourseSchedule(Student student, CourseSchedule courseSchedule);
+    @Query("SELECT COUNT(i) FROM Inscripcion i WHERE i.courseSchedule.id = :courseScheduleId AND i.estado = 'ACTIVA'")
+    Long countActiveByCourseSchedule(@Param("courseScheduleId") Long courseScheduleId);
 }

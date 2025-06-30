@@ -34,9 +34,9 @@ public class Inscripcion {
     private Student student;
     
     @ManyToOne
-    @JoinColumn(nullable = false, name = "course_id")
+    @JoinColumn(nullable = false, name = "courseSchedule_id")
    //@JsonBackReference
-    private Course course;
+    private CourseSchedule course;
     
     @Column(name = "fecha_inscripcion", nullable = false)
     private LocalDateTime fechaInscripcion;

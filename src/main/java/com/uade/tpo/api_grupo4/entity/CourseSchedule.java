@@ -1,24 +1,19 @@
 package com.uade.tpo.api_grupo4.entity;
 
 import java.io.Serializable;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +40,12 @@ public class CourseSchedule implements Serializable {
     private String instructor;
     private int vacancy;
     private int diaEnQueSeDicta;
-
+    @OneToMany(mappedBy = "courseSchedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    //@JsonManagedReference
+    private List<Inscripcion> inscripciones;
+    @ManyToOne
+    @JoinColumn(name = "headquarter_id")
+    private Headquarter sede;
     public CourseScheduleView toView() {
         return new CourseScheduleView(
                 this.id,
@@ -54,6 +54,8 @@ public class CourseSchedule implements Serializable {
                 this.horaFin,
                 this.instructor,
                 this.vacancy,
-                this.diaEnQueSeDicta);
+                this.diaEnQueSeDicta,
+                this.inscripciones,
+                this.sede);
     }
 }

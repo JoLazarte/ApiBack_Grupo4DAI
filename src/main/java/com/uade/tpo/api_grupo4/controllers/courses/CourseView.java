@@ -31,8 +31,7 @@ public class CourseView {
     @JsonIgnore
     private List<CourseSchedule> cronogramas;
 
-    @JsonIgnore
-    private List<Inscripcion> inscripciones;
+   
 
     public Course toEntity(){
         return new Course(
@@ -46,8 +45,7 @@ public class CourseView {
             this.fechaInicio,
             this.fechaFin, 
             this.sedes,
-            this.cronogramas,
-            this.inscripciones
+            this.cronogramas
         );
     }
 }

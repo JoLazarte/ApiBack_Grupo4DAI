@@ -117,18 +117,17 @@ public class ApiHeadquarter {
     }
 
     @PutMapping("/{sedeId}/{courseId}")
-    public ResponseEntity<ResponseData<?>> selecionarSedeParaCurso(@PathVariable Long sedeId, @PathVariable Long courseId) {
+    public ResponseEntity<ResponseData<?>> cargarSedesParaCurso(@PathVariable Long sedeId, @PathVariable Long courseId) {
         try {
 
-        Headquarter sedeSeleccionada = controlador.seleccionarSede(sedeId, courseId);
-      
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(sedeSeleccionada));
+        controlador.cargarSede(sedeId, courseId);
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(null));
 
         }catch (HeadquarterException error) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
 
         } catch (Exception error) {
-        System.out.printf("[ApiHeadquarter.selecionarSedeParaCurso] -> %s", error.getMessage() );
+        System.out.printf("[ApiHeadquarter.cargarSedesParaCurso] -> %s", error.getMessage() );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo seleccionar la sede"));
         }
     }
