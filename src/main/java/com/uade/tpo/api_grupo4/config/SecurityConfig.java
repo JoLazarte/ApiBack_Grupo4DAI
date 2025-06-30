@@ -16,7 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Inyectamos el nuevo filtro y el proveedor de autenticación
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
@@ -25,7 +24,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Definimos las rutas públicas
+                        // 1. Rutas públicas para registro y login
                         .requestMatchers(
                                 "/apiUser/loginUser",
                                 "/apiUser/registerUser",
@@ -34,13 +33,20 @@ public class SecurityConfig {
                                 "/apiUser/iniciar-registro",
                                 "/apiUser/finalizar-registro"
                         ).permitAll()
-                        // Para cualquier otra petición, se requerirá autenticación
+                        
+                        // 2. Rutas públicas para cargar datos maestros (types, units)
+                        .requestMatchers(HttpMethod.POST, "/apiRecipes/types").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/apiRecipes/units").permitAll()
+
+                        // ▼▼▼ ¡LA NUEVA LÍNEA QUE AÑADIMOS! ▼▼▼
+                        // 3. Permite que cualquiera pueda VER (GET) la lista de recetas y sus búsquedas.
+                        .requestMatchers(HttpMethod.GET, "/apiRecipes", "/apiRecipes/search/**", "/apiRecipes/types", "/apiRecipes/units").permitAll()
+
+                        // 4. Para cualquier otra petición (como POST /apiRecipes), se requerirá autenticación.
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                // ▼▼▼ ¡LA LÍNEA MÁS IMPORTANTE! ▼▼▼
-                // Añadimos nuestro filtro JWT ANTES del filtro de usuario/contraseña de Spring.
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

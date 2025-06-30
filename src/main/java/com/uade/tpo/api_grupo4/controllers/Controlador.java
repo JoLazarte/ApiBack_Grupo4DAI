@@ -187,7 +187,7 @@ public class Controlador {
 		}
 	}
 
-	//--------Iniciar Registro--------
+//--------Iniciar Registro--------
 	public void iniciarRegistro(RegisterRequest request) throws UserException {
 		if (aliasExists(request.getUsername())) {
 			throw new UserException("El nombre de usuario '" + request.getUsername() + "' ya está en uso.");
@@ -304,6 +304,7 @@ public class Controlador {
 		}
 		return student.getPassword().equals(loginRequest.getPassword());
 	}
+
 
 
 	//-----------------------------------------------Users--------------------------------------------------------------------------------------------------------------------------------------------------------

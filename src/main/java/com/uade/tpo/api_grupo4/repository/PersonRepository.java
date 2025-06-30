@@ -11,3 +11,4 @@ import com.uade.tpo.api_grupo4.entity.Person;
 public interface PersonRepository extends JpaRepository<Person, Long> {
     
 }
+
