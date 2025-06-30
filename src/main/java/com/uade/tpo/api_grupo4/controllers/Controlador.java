@@ -3,7 +3,6 @@ package com.uade.tpo.api_grupo4.controllers;
 import com.uade.tpo.api_grupo4.controllers.courseSchedule.CourseScheduleView;
 import com.uade.tpo.api_grupo4.controllers.courses.CourseView;
 import com.uade.tpo.api_grupo4.controllers.courses.InscripcionView;
-import com.uade.tpo.api_grupo4.controllers.headquarter.HeadquarterView;
 import com.uade.tpo.api_grupo4.controllers.person.AuthenticationResponse;
 import com.uade.tpo.api_grupo4.controllers.person.LoginRequest;
 import com.uade.tpo.api_grupo4.controllers.person.RegisterRequest;
@@ -13,7 +12,6 @@ import com.uade.tpo.api_grupo4.controllers.recipe.CreateUnitRequest;
 import com.uade.tpo.api_grupo4.controllers.recipe.MaterialRequestDTO;
 import com.uade.tpo.api_grupo4.controllers.recipe.StepRequestDTO;
 import com.uade.tpo.api_grupo4.entity.Course;
-import com.uade.tpo.api_grupo4.entity.CourseAttended;
 import com.uade.tpo.api_grupo4.entity.CourseMode;
 import com.uade.tpo.api_grupo4.entity.CourseSchedule;
 import com.uade.tpo.api_grupo4.entity.Headquarter;
@@ -53,10 +51,9 @@ import com.uade.tpo.api_grupo4.service.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -544,14 +541,10 @@ public class Controlador {
 	public void inicializarCursos() throws Exception {
 		try{	
 
-		
             Course course1 = new Course(null, "Cocina Vegana", "Familiarizate con la cocina vegana.", "No necesitas conocimientos previos.", 120, 600, CourseMode.MIXTO, "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-
             Course cours2 = new Course(null, "Cocina Asiática", "Comprendé técnicas básicas clave.", "Conocimientos básicos de cocina.", 180, 800, CourseMode.PRESENCIAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-         
             Course course3 = new Course(null, "Reposteria Cacera", "Aprendé a conocer sobre decoracion.", "Material de reposteria.", 120, 400, CourseMode.VIRTUAL,  "2025-08-08", "2025-11-08", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-           
-
+          
             courseRepository.save(course1); 
 			courseRepository.save(cours2);
 			courseRepository.save(course3);
@@ -601,9 +594,43 @@ public class Controlador {
                 .collect(Collectors.toList());
     }
 
+
+
 	//----------------------------------Inscripciones----------------------------------------------------------//
+	@Transactional
+    public InscripcionView enrollStudent(Long studentId, Long courseId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+        
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+        
+        // Verificar que el estudiante no esté ya inscripto en el curso
+        Optional<Inscripcion> existingInscription = inscripcionRepository
+                .findByStudentAndCourse(student, course);
+        
+        if (existingInscription.isPresent() && 
+            "ACTIVA".equals(existingInscription.get().getEstado())) {
+            throw new IllegalArgumentException("El estudiante ya está inscripto en este curso");
+        }
+        
+        // Verificar disponibilidad de cupos
+        Long activeEnrollments = inscripcionRepository.countActiveByCourse(courseId);
+        // Aquí podrías agregar lógica para verificar cupos disponibles basado en cronogramas
+        
+        Inscripcion inscripcion = Inscripcion.builder()
+                .student(student)
+                .course(course)
+                .fechaInscripcion(LocalDateTime.now())
+                .estado("ACTIVA")
+                .build();
+        
+        Inscripcion savedInscripcion = inscripcionRepository.save(inscripcion);
+        return mapToView(savedInscripcion);
+    }
+    
 	
-    @Transactional
+	@Transactional
     public Optional<InscripcionView> cancelEnrollment(Long inscripcionId) {
         return inscripcionRepository.findById(inscripcionId)
                 .map(inscripcion -> {
@@ -634,22 +661,25 @@ public class Controlador {
 
 	//-----------------------------------------------CourseSchedule--------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	public Headquarter seleccionarSede(Long sedeId){
-		Headquarter sedeSeleccionada = headquarterRepository.findById(sedeId).orElseThrow(() -> new HeadquarterException("La sede con id " + sedeId + " no existe."));
-		return sedeSeleccionada;
-	}
-
 	public CourseSchedule saveCronograma(Long courseId, CourseSchedule schedule) throws Exception {
       try{
 		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
         schedule.setCourse(course);
+		List<CourseSchedule> cronogramas = new ArrayList<>();
+		List<CourseSchedule> existeListaCronogramas = course.getCronogramas();
+		if( existeListaCronogramas == null){
+			cronogramas.add(schedule);
+			course.setCronogramas(cronogramas);
+		} else existeListaCronogramas.add(schedule);
+		courseRepository.save(course);
 		CourseSchedule schedulecreated = courseSchedRepository.save(schedule);   
         return schedulecreated;
 
 		} catch (Exception error) {
             throw new Exception("[Controlador.createCourse] -> " + error.getMessage());
           }
-        }
+    }
+
     public CourseSchedule updateCronograma(CourseSchedule courseSchedule) throws Exception {
           try {
             if (!courseSchedRepository.existsById(courseSchedule.getId())) 
@@ -758,6 +788,15 @@ public class Controlador {
           }
     }
 
+	public Headquarter seleccionarSede(Long sedeId, Long courseId){
+		Headquarter sedeSeleccionada = headquarterRepository.findById(sedeId).orElseThrow(() -> new HeadquarterException("La sede con id " + sedeId + " no existe."));
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseException("Curso no encontrado"));
+		
+		course.setSedes(List.of(sedeSeleccionada));
+		
+		courseRepository.save(course);
+		return sedeSeleccionada;
+	}
 	
 
 	//-----------------------------------------------CourseAttended--------------------------------------------------------------------------------------------------------------------------------------------------------

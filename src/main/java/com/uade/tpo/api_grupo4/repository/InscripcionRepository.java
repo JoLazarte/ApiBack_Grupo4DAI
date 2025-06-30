@@ -20,8 +20,6 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     List<Inscripcion> findByCourseId(Long courseId);
     List<Inscripcion> findByEstado(String estado);
     Optional<Inscripcion> findByStudentAndCourse(Student student, Course course);
-    
-    @Query("SELECT i FROM Inscripcion i WHERE i.student.id = :studentId AND i.estado = 'ACTIVA'")
-    List<Inscripcion> findActiveInscriptionsByStudent(@Param("studentId") Long studentId);
-    
+    @Query("SELECT COUNT(i) FROM Inscripcion i WHERE i.course.id = :courseId AND i.estado = 'ACTIVA'")
+    Long countActiveByCourse(@Param("courseId") Long courseId);
 }

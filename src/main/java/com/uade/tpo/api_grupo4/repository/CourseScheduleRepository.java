@@ -16,9 +16,5 @@ public interface CourseScheduleRepository extends JpaRepository<CourseSchedule, 
     List<CourseSchedule> findByDiaEnQueSeDicta(int dia);
     List<CourseSchedule> findByInstructorContainingIgnoreCase(String instructor);
     
-    @Query("SELECT cs FROM CourseSchedule cs WHERE cs.vacancy > 0")
-    List<CourseSchedule> findSchedulesWithVacancy();
     
-    @Query("SELECT cs FROM CourseSchedule cs WHERE cs.course.id = :courseId AND cs.vacancy > 0")
-    List<CourseSchedule> findAvailableSchedulesByCourse(@Param("courseId") Long courseId);
 }

@@ -94,7 +94,7 @@ public class ApiHeadquarter {
         HeadquarterView updatedSedeView = updatedSede.toView();
         return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(updatedSedeView));
 
-        }catch (CourseException error) {
+        }catch (HeadquarterException error) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
 
         } catch (Exception error) {
@@ -116,5 +116,21 @@ public class ApiHeadquarter {
         }
     }
 
+    @PutMapping("/{sedeId}/{courseId}")
+    public ResponseEntity<ResponseData<?>> selecionarSedeParaCurso(@PathVariable Long sedeId, @PathVariable Long courseId) {
+        try {
+
+        Headquarter sedeSeleccionada = controlador.seleccionarSede(sedeId, courseId);
+      
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseData.success(sedeSeleccionada));
+
+        }catch (HeadquarterException error) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseData.error(error.getMessage()));
+
+        } catch (Exception error) {
+        System.out.printf("[ApiHeadquarter.selecionarSedeParaCurso] -> %s", error.getMessage() );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.error("No se pudo seleccionar la sede"));
+        }
+    }
     
 }
