@@ -24,6 +24,7 @@ import com.uade.tpo.api_grupo4.entity.PendingUser;
 import com.uade.tpo.api_grupo4.entity.Person;
 import com.uade.tpo.api_grupo4.entity.Recipe;
 import com.uade.tpo.api_grupo4.entity.Review;
+import com.uade.tpo.api_grupo4.entity.SavedRecipe;
 import com.uade.tpo.api_grupo4.entity.Step;
 import com.uade.tpo.api_grupo4.entity.Student;
 import com.uade.tpo.api_grupo4.entity.TypeOfRecipe;
@@ -42,8 +43,10 @@ import com.uade.tpo.api_grupo4.repository.InscripcionRepository;
 import com.uade.tpo.api_grupo4.repository.IngredientRepository;
 import com.uade.tpo.api_grupo4.repository.MaterialUsedRepository;
 import com.uade.tpo.api_grupo4.repository.PendingUserRepository;
+import com.uade.tpo.api_grupo4.repository.PersonRepository;
 import com.uade.tpo.api_grupo4.repository.RecipeRepository;
 import com.uade.tpo.api_grupo4.repository.ReviewRepository;
+import com.uade.tpo.api_grupo4.repository.SavedRecipeRepository;
 import com.uade.tpo.api_grupo4.repository.StepRepository;
 import com.uade.tpo.api_grupo4.repository.StudentRepository;
 import com.uade.tpo.api_grupo4.repository.TypeOfRecipeRepository;
@@ -59,8 +62,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -71,6 +76,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,7 +97,9 @@ public class Controlador {
 	private final TypeOfRecipeRepository typeOfRecipeRepository;
 	private final StepRepository stepRepository;
 	private final ReviewRepository reviewRepository;
+	private final SavedRecipeRepository savedRecipeRepository;
 	private final JwtService jwtService;
+	private final PersonRepository personRepository;
 	private final AuthenticationManager authenticationManager;
 	private final PendingUserRepository pendingUserRepository;
 	private final EmailService emailService;
@@ -541,7 +549,141 @@ public class Controlador {
 		return reviewRepository.save(newReview);
 	}
 
+		//--------MODIFICAR RECETA-----------
+	@Transactional
+	public Recipe updateRecipe(Long recipeId, CreateRecipeRequest request, Person author) throws Exception {
+		Recipe existingRecipe = recipeRepository.findById(recipeId)
+				.orElseThrow(() -> new Exception("Receta no encontrada con ID: " + recipeId));
+
+		// Verificar que el autor de la receta sea la misma persona que intenta modificarla
+		if (!existingRecipe.getUser().getId().equals(author.getId())) {
+			throw new Exception("No tienes permiso para modificar esta receta.");
+		}
+
+		// Actualizar campos principales de la receta
+		existingRecipe.setRecipeName(request.getRecipeName());
+		existingRecipe.setMainPicture(request.getMainPicture());
+		existingRecipe.setServings(request.getServings());
+		existingRecipe.setComensales(request.getCantidadPersonas());
+		existingRecipe.setDescriptionGeneral(request.getDescriptionGeneral());
+
+		// Actualizar el tipo de receta si se proporciona
+		if (request.getTypeOfRecipeId() != null) {
+			TypeOfRecipe typeOfRecipe = typeOfRecipeRepository.findById(request.getTypeOfRecipeId())
+					.orElseThrow(() -> new Exception("Tipo de receta no encontrado con ID: " + request.getTypeOfRecipeId()));
+			existingRecipe.setTypeOfRecipe(typeOfRecipe);
+		}
+
+		// --- Actualizar Ingredientes (MaterialUsed) ---
+		// Borrar los materiales existentes para esta receta
+		materialUsedRepository.deleteAll(existingRecipe.getIngredients());
+		existingRecipe.getIngredients().clear(); // Limpiar la lista en memoria
+
+		if (request.getIngredients() != null) {
+			for (MaterialRequestDTO materialDto : request.getIngredients()) {
+				Ingredient ingredientToUse;
+
+				if (materialDto.getIngredientId() != null) {
+					ingredientToUse = ingredientRepository.findById(materialDto.getIngredientId())
+							.orElseThrow(() -> new Exception("Ingrediente no encontrado con el ID proporcionado: " + materialDto.getIngredientId()));
+				} else if (materialDto.getIngredientName() != null && !materialDto.getIngredientName().trim().isEmpty()) {
+					String ingredientName = materialDto.getIngredientName().trim().toLowerCase();
+					ingredientToUse = ingredientRepository.findByName(ingredientName)
+							.orElseGet(() -> {
+								Ingredient newIngredient = Ingredient.builder().name(ingredientName).build();
+								return ingredientRepository.save(newIngredient);
+							});
+				} else {
+					throw new Exception("Se debe proporcionar 'ingredientId' o 'ingredientName' para cada material.");
+				}
+
+				Unit unit = materialDto.getUnitId() != null ? unitRepository.findById(materialDto.getUnitId())
+						.orElseThrow(() -> new Exception("Unidad no encontrada con ID: " + materialDto.getUnitId())) : null;
+
+				MaterialUsed material = MaterialUsed.builder()
+						.recipe(existingRecipe)
+						.ingredient(ingredientToUse)
+						.unity(unit)
+						.quantity(materialDto.getQuantity())
+						.observation(materialDto.getObservation())
+						.build();
+				existingRecipe.getIngredients().add(material);
+			}
+		}
+
+		// --- Actualizar Pasos (Step) ---
+		// Borrar los pasos existentes para esta receta
+		stepRepository.deleteAll(existingRecipe.getDescription());
+		existingRecipe.getDescription().clear(); // Limpiar la lista en memoria
+
+		if (request.getSteps() != null) {
+			for (StepRequestDTO stepDto : request.getSteps()) {
+				Step step = Step.builder()
+						.recipe(existingRecipe)
+						.numberOfStep(stepDto.getNumberOfStep())
+						.comment(stepDto.getComment())
+						.imagenPaso(stepDto.getImagenPaso())
+						.videoPaso(stepDto.getVideoPaso())
+						.build();
+				existingRecipe.getDescription().add(step);
+			}
+		}
+
+		return recipeRepository.save(existingRecipe);
+	}
+	
+	@Transactional
+    public boolean toggleSaveRecipe(Long userId, Long recipeId) {
+        // Asegúrate de que PersonRepository esté inyectado en Controlador
+        Person user = personRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new RuntimeException("Receta no encontrada con ID: " + recipeId));
+
+        Optional<SavedRecipe> existingSavedRecipe = savedRecipeRepository.findByUserAndRecipe(user, recipe);
+
+        if (existingSavedRecipe.isPresent()) {
+            savedRecipeRepository.delete(existingSavedRecipe.get());
+            return false; // Indicamos que se desguardó
+        } else {
+            SavedRecipe newSavedRecipe = SavedRecipe.builder()
+                    .user(user)
+                    .recipe(recipe)
+                    .build();
+            savedRecipeRepository.save(newSavedRecipe);
+            return true; // Indicamos que se guardó
+        }
+    }
+
+    public List<Recipe> getSavedRecipesByUser(Long userId) {
+        // Asegúrate de que PersonRepository esté inyectado en Controlador
+        Person user = personRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+        List<SavedRecipe> savedRecipes = savedRecipeRepository.findByUser(user);
+        // Mapeamos SavedRecipe a Recipe para devolver la lista de recetas
+        return savedRecipes.stream()
+                .map(SavedRecipe::getRecipe)
+                .collect(Collectors.toList());
+    }
+
+    public boolean isRecipeSavedByUser(Long userId, Long recipeId) {
+        // Asegúrate de que PersonRepository esté inyectado en Controlador
+        Person user = personRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new RuntimeException("Receta no encontrada con ID: " + recipeId));
+        return savedRecipeRepository.existsByUserAndRecipe(user, recipe);
+    }
+
+
 	//-----------------------------------------------Busquedas--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	//--------Receta por id--------
+	public Recipe getRecipeById(Long id) { // O como hayas llamado al método
+		// ✅ USA EL NUEVO MÉTODO DEL REPOSITORIO
+		return recipeRepository.findByIdWithReviewsAndAuthor(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Receta no encontrada"));
+	}
 
 	//--------Todas las recetas--------
 	public Page<Recipe> findAllRecipes(String sortOrder, int page, int size) {

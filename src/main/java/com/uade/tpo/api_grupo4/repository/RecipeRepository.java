@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.uade.tpo.api_grupo4.entity.Recipe;
+import java.util.Optional;
 
 
 
@@ -41,5 +42,8 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
      */
     @Query("SELECT r FROM Recipe r WHERE r.id NOT IN (SELECT r2.id FROM Recipe r2 JOIN r2.ingredients m JOIN m.ingredient i WHERE lower(i.name) LIKE lower(concat('%', :ingredientName, '%')))")
     Page<Recipe> findRecipesWithoutIngredient(@Param("ingredientName") String ingredientName, Pageable pageable);
+
+    @Query("SELECT r FROM Recipe r LEFT JOIN FETCH r.reviews rev LEFT JOIN FETCH rev.user WHERE r.id = :id")
+    Optional<Recipe> findByIdWithReviewsAndAuthor(@Param("id") Long id);
 }
 

@@ -30,10 +30,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 
 @RestController
@@ -123,6 +125,33 @@ public class ApiRecipe {
         }
     }
 
+    @PostMapping("/toggle-save/{userId}/{recipeId}") // URL para guardar/desguardar
+    public ResponseEntity<String> toggleSaveRecipe(
+            @PathVariable Long userId,
+            @PathVariable Long recipeId) {
+        try {
+            boolean isSaved = controlador.toggleSaveRecipe(userId, recipeId);
+            if (isSaved) {
+                return new ResponseEntity<>("Receta guardada exitosamente.", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Receta desguardada exitosamente.", HttpStatus.OK);
+            }
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // Por ejemplo, usuario o receta no encontrados
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al procesar la solicitud.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
+        // Llamamos al método en nuestro "servicio" (Controlador.java)
+        Recipe recipe = controlador.getRecipeById(id);
+        // Si lo encuentra, Spring automáticamente devolverá un 200 OK.
+        // La excepción del paso anterior se encargará de los casos 404.
+        return ResponseEntity.ok(recipe);
+    }
+
     @GetMapping
     public ResponseEntity<?> getAllRecipes(
             @RequestParam(defaultValue = "alpha_asc") String sort,
@@ -206,5 +235,54 @@ public class ApiRecipe {
         
         // Devolvemos la página completa con un 200 OK
         return ResponseEntity.ok(recipePage);
+    }
+
+    @GetMapping("/saved-by-user/{userId}") // URL para obtener recetas guardadas por un usuario
+    public ResponseEntity<List<Recipe>> getSavedRecipesForUser(@PathVariable Long userId) {
+        try {
+            List<Recipe> savedRecipes = controlador.getSavedRecipesByUser(userId);
+            return new ResponseEntity<>(savedRecipes, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Usuario no encontrado
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/is-saved/{userId}/{recipeId}") // URL para verificar si está guardada
+    public ResponseEntity<Boolean> isRecipeSaved(
+            @PathVariable Long userId,
+            @PathVariable Long recipeId) {
+        try {
+            boolean isSaved = controlador.isRecipeSavedByUser(userId, recipeId);
+            return new ResponseEntity<>(isSaved, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND); // Usuario o receta no encontrados, o manejo de errores
+        } catch (Exception e) {
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{recipeId}")
+    public ResponseEntity<?> updateRecipe(
+            @PathVariable Long recipeId,
+            @RequestBody CreateRecipeRequest request,
+            @AuthenticationPrincipal Person author // Obtiene la persona autenticada
+    ) {
+        try {
+            if (author == null) {
+                return new ResponseEntity<>("No autenticado. Se requiere un token de usuario.", HttpStatus.UNAUTHORIZED);
+            }
+            Recipe updatedRecipe = controlador.updateRecipe(recipeId, request, author);
+            return new ResponseEntity<>(updatedRecipe, HttpStatus.OK);
+        } catch (Exception e) {
+            // Manejo de errores más específico si lo necesitas
+            if (e.getMessage().contains("No tienes permiso")) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+            } else if (e.getMessage().contains("no encontrada")) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }

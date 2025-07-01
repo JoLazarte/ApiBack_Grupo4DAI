@@ -1,6 +1,7 @@
 package com.uade.tpo.api_grupo4.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,12 +24,12 @@ public class Review {
     @NotNull
     @ManyToOne
     @JoinColumn(nullable = false, name = "recipe_id")
-    @JsonBackReference
+    @JsonBackReference("recipe-reviews")
     private Recipe recipe;
     @NotNull
     @ManyToOne
     @JoinColumn(nullable = false, name = "user_id")
-    @JsonBackReference("review-author")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "reviews", "recipes"})
     private Person user;
     @NotNull
     private int rating;

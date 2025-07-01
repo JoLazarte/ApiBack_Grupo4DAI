@@ -1,5 +1,6 @@
 package com.uade.tpo.api_grupo4.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class PendingUser {
     private String lastName;
     private String phone;
     private String address;
+    @Column(columnDefinition = "LONGTEXT")
     private String urlAvatar;
     private Boolean permissionGranted;
 

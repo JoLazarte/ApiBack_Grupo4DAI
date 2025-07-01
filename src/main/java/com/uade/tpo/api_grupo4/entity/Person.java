@@ -39,12 +39,12 @@ public abstract class Person implements UserDetails {
 
     // Lista de recetas CREADAS por esta Persona
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonManagedReference("author-recipes")
+    @JsonManagedReference("author-recipes")
     private List<Recipe> recipes;
 
     // Lista de recetas GUARDADAS por esta Persona
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonManagedReference("saver-recipes")
+    @JsonManagedReference("saver-recipes")
     private List<SavedRecipe> savedRecipes;
 
     // Lista de reseñas ESCRITAS por esta Persona

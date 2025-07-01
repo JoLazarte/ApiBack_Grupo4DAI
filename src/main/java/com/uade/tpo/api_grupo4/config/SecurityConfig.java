@@ -37,10 +37,12 @@ public class SecurityConfig {
                         // 2. Rutas públicas para cargar datos maestros (types, units)
                         .requestMatchers(HttpMethod.POST, "/apiRecipes/types").permitAll()
                         .requestMatchers(HttpMethod.POST, "/apiRecipes/units").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/apiRecipes//{recipeId}/reviews").permitAll()
+
 
                         // ▼▼▼ ¡LA NUEVA LÍNEA QUE AÑADIMOS! ▼▼▼
                         // 3. Permite que cualquiera pueda VER (GET) la lista de recetas y sus búsquedas.
-                        .requestMatchers(HttpMethod.GET, "/apiRecipes", "/apiRecipes/search/**", "/apiRecipes/types", "/apiRecipes/units").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/apiRecipes/**").permitAll()
 
                         // 4. Para cualquier otra petición (como POST /apiRecipes), se requerirá autenticación.
                         .anyRequest().authenticated()

@@ -61,7 +61,7 @@ public class Recipe {
     private TypeOfRecipe typeOfRecipe; //seria como la categoria. Ej: vegana, desayuno, etc
     @NotNull
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("recipe-reviews")
     private List<Review> reviews;
     
 
